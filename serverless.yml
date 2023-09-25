@@ -1,0 +1,30 @@
+service: jisshu-backend
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: python3.11
+  architecture: x86_64
+  stage: dev
+  region: us-east-1
+
+package:
+  patterns:
+    - "!**"
+    - "src/**"
+
+functions:
+  service:
+    handler: src.main.handler
+    events:
+      - http:
+          path: /{path+}
+          method: ANY
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerImage: public.ecr.aws/sam/build-python3.11:latest-x86_64
+    dockerizePip: true

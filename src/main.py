@@ -1,5 +1,5 @@
 import os
-from lib import chat_api
+from .lib import chat_api
 from fastapi import FastAPI
 from mangum import Mangum
 import openai
@@ -16,12 +16,15 @@ def read_root():
     return {"Hello": "World"}
 
 
-# /completion
-@app.get("/completion/post")
+# /moderations
+@app.get("/moderations")
 async def post_completion(
-    prompt: str, model: str = "gpt-3.5-turbo", response_language: str = "日本語"
+    prompt: str,
+    user_id: str,
+    model: str = "gpt-3.5-turbo",
+    response_language: str = "日本語",
 ):
-    return chat_api.chat_modelate(prompt, model, response_language)
+    return chat_api.chat_modelate(prompt, user_id, model, response_language)
 
 
 handler = Mangum(app, lifespan="off")
