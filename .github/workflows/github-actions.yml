@@ -29,4 +29,4 @@ jobs:
       - name: serverless deploy
         uses: serverless/github-action@v3.1
         with:
-          args: -c "pwd && serverless deploy --verbose --config serverless.yml"
+          args: deploy --verbose --config serverless.yml
