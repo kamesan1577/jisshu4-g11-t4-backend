@@ -27,7 +27,6 @@ jobs:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
       - name: serverless deploy
-        run: pwd
         uses: serverless/github-action@v3.1
         with:
-          args: -c "serverless deploy --verbose --config serverless.yml"
+          args: -c "pwd && serverless deploy --verbose --config serverless.yml"
