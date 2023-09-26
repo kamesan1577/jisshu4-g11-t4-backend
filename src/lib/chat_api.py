@@ -2,7 +2,7 @@ import openai
 from fastapi import HTTPException
 
 
-def chat_modelate(prompt, model, response_language):
+def chat_modelate(prompt, user_id, model, response_language):
     system_prompt = {
         "role": "system",
         "content": f"""
