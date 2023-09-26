@@ -26,7 +26,9 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
-      - name: serverless deploy
-        uses: serverless/github-action@v3.1
-        with:
-          args: -c "serverless plugin install --name serverless-python-requirements && serverless deploy --verbose --config serverless.yml 
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+      - name: Install Serverless Python Requirements Plugin
+        run: serverless plugin install --name serverless-python-requirements
+      - name: Deploy Serverless Service
+        run: serverless deploy --verbose --config serverless.yml
