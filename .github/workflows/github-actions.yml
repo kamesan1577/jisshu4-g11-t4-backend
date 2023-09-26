@@ -26,9 +26,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
-      # - name: serverless config
-      #   run: npx serverless config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: serverless deploy
         uses: serverless/github-action@v3.1
         with:
-          args: -c "serverless deploy --verbose"
+          args: -c "serverless deploy --verbose --config serverless.yml"
