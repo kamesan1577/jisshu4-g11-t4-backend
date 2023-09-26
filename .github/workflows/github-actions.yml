@@ -26,6 +26,8 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
+      - name: Install serverless-python-requirements plugin
+        run: serverless plugin install -n serverless-python-requirements
       - name: serverless deploy
         uses: serverless/github-action@v3.1
         with:
