@@ -1,38 +1,34 @@
-name: actions-serverless
+name: Deploy master branch
 
 on:
   push:
     branches:
       - master
 
-env:
-  AWS_REGION: us-east-1
-  AWS_ROLE_ARN: ${{ secrets.IAM_ROLE_ARN }}
-
 jobs:
   deploy:
-    name: Deploy
+    name: deploy
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x]
     permissions:
       id-token: write
       contents: read
+    strategy:
+      matrix:
+        node-version: [16.x]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Configure AWS credentials from IAM Role
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+      - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
+      # - name: serverless config
+      #   run: npx serverless config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: serverless deploy
         uses: serverless/github-action@v3.1
         with:
-          args: -c "cd serverless/ && npm ci && serverless deploy"
-          entrypoint: /bin/bash
+          args: deploy
