@@ -29,4 +29,4 @@ jobs:
       - name: serverless deploy
         uses: serverless/github-action@v3.1
         with:
-          args: deploy --verbose --config serverless.yml && plugin install --name serverless-python-requirements
+          args: -c"serverless deploy --verbose --config serverless.yml && serverless plugin install --name serverless-python-requirements
