@@ -1,9 +1,9 @@
-name: Deploy master branch
+name: Deploy dev branch
 
 on:
   push:
     branches:
-      - master
+      - dev
 
 jobs:
   deploy:
@@ -31,4 +31,4 @@ jobs:
       - name: serverless deploy
         uses: serverless/github-action@v3.1
         with:
-          args: deploy
+          args: -c "serverless deploy --verbose"
