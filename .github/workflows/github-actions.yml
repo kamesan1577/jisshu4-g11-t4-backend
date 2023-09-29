@@ -24,6 +24,7 @@ jobs:
 
   deploy:
     name: deploy
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       id-token: write
