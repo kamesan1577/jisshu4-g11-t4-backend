@@ -11,10 +11,22 @@ def test_read_root():
 
 
 def test_chat_modelate():
-    response = client.get(
+    response = client.post(
         "/moderations",
-        params={
+        json={
             "prompt": "これはテストです。",
+            "user_id": "test",
+            "model": "gpt-3.5-turbo",
+            "response_language": "日本語",
+        },
+    )
+    assert response.status_code == 200
+    assert "response" in response.json()
+
+    response = client.post(
+        "/moderations",
+        json={
+            "prompt": ["これはテストです。", "これはテストです。"],
             "user_id": "test",
             "model": "gpt-3.5-turbo",
             "response_language": "日本語",
