@@ -3,6 +3,7 @@ import logging
 import json
 from .lib import chat_api, tweet, data_collection
 from fastapi import FastAPI, HTTPException
+from starlette.middleware.cors import CORSMiddleware
 from mangum import Mangum
 import openai
 from dotenv import load_dotenv
@@ -18,6 +19,13 @@ elif os.environ.get("APP_ENV") == "PROD":
     app = FastAPI(openapi_prefix="/prod")
 else:
     app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 load_dotenv(verbose=True)
 openai.api_key = os.environ.get("INIAD_OPENAI_API_KEY")
