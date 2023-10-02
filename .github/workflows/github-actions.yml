@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - dev
+  pull_request:
+    branches:
+      - dev
+      - master
 
 jobs:
   test:
@@ -26,6 +30,7 @@ jobs:
         run: bash test.sh
 
   deploy:
+    if: github.event_name == 'push'
     name: deploy
     needs: test
     runs-on: ubuntu-latest
