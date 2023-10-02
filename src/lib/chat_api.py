@@ -50,7 +50,11 @@ def chat_modelate(prompt, user_id, model, response_language):
     try:
         if response.choices:
             response_content = response["choices"][0]["message"]["content"]
-            response_log = {"user_id": user_id, "response_content": response_content}
+            response_log = {
+                "user_id": user_id,
+                "request_content": user_prompt[-1]["content"],
+                "response_content": response_content,
+            }
             logger.info(json.dumps(response_log))  # Log the response in JSON format
             return {"response": response_content}
         else:

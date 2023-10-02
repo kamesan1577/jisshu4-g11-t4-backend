@@ -86,3 +86,63 @@ def test_error_chat_modelate():
     )
     assert response.status_code == 422
     assert "response" not in response.json()
+
+
+# 隠された文字列の統計情報の正常系テスト
+def test_data_collection():
+    response = client.post(
+        "/hidden-text-collection",
+        json={
+            "user_id": "test",
+            "original_text": "これはテストです。",
+            "hidden_texts": ["これは", "です。"],
+        },
+    )
+    assert response.status_code == 200
+
+    response = client.post(
+        "/hidden-text-collection",
+        json={
+            "user_id": "test",
+            "original_text": "これはテストです。",
+            "hidden_texts": ["これは", "です。"],
+            "original_text_num": 7,
+            "hidden_texts_num": 5,
+        },
+    )
+    assert response.status_code == 200
+
+    response = client.post(
+        "/hidden-text-collection",
+        json={
+            "user_id": "test",
+            "original_text": "これはテストです。",
+            "hidden_texts": ["これは", "です。"],
+            "original_text_num": "7",
+            "hidden_texts_num": "5",
+        },
+    )
+    assert response.status_code == 200
+
+
+# 隠された文字列の統計情報の異常系テスト
+def test_error_data_collection():
+    response = client.post(
+        "/hidden-text-collection",
+        json={
+            "user_id": "test",
+            "original_text": "これはテストです。",
+            "hidden_texts": [123, "です。"],
+        },
+    )
+    assert response.status_code == 422
+
+    response = client.post(
+        "/hidden-text-collection",
+        json={
+            "user_id": "test",
+            "original_text": "これはテストです。",
+            "hidden_texts": "これは",
+        },
+    )
+    assert response.status_code == 422

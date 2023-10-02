@@ -1,10 +1,13 @@
 import os
-from .lib import chat_api, tweet
-from fastapi import FastAPI
+import logging
+from .lib import chat_api, tweet, data_collection
+from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 import openai
 from dotenv import load_dotenv
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 if os.environ.get("APP_ENV") == "DEV":
     app = FastAPI()
@@ -35,6 +38,19 @@ async def post_completion(
     return chat_api.chat_modelate(
         tweet.prompt, tweet.user_id, tweet.model, tweet.response_language
     )
+
+
+# 隠された文字列の統計情報をログに送信
+@app.post("/hidden-text-collection")
+async def post_hidden_text_collection(
+    hidden_chars: data_collection.HiddenChars,
+):
+    try:
+        logging.info(hidden_chars)
+        return {"message": "success"}
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Log send failed")
 
 
 handler = Mangum(app, lifespan="off")
