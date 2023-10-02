@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 # リクエストのモデル
 class Tweet(BaseModel):
-    prompt: Union[str, list]
+    prompt: Union[str, list[str]]
     user_id: str
     model: str = "gpt-3.5-turbo"
     response_language: str = "日本語"
