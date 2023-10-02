@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 from .lib import chat_api, tweet, data_collection
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
@@ -46,7 +47,7 @@ async def post_hidden_text_collection(
     hidden_chars: data_collection.HiddenChars,
 ):
     try:
-        logging.info(hidden_chars)
+        logging.info(json.dumps(hidden_chars.dict()))
         return {"message": "success"}
     except Exception as e:
         logging.error(e)
