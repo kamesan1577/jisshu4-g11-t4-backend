@@ -9,6 +9,7 @@
 # 環境構築 (筆者は Ubuntu 22.04 を使用)
 
 1. 仮想環境の作成
+   <br>
    Ubuntu
    ```bash
    python3 -m venv venv
@@ -18,6 +19,7 @@
    python -m venv venv
    ```
 2. 仮想環境の有効化
+   <br>
    Ubuntu
    ```bash
    source venv/bin/activate
@@ -27,11 +29,13 @@
    .\venv\Scripts\activate
    ```
 3. 依存パッケージのインストール
+   <br>
    共通
    ```bash
    pip install -r requirements.txt
    ```
 4. サーバーの起動
+   <br>
    共通
    ```bash
    uvicorn src.main:app --reload
