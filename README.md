@@ -1,4 +1,4 @@
-# Hate Abate(仮)
+# Hate Abate
 
 ## 概要
 
