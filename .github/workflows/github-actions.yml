@@ -1,13 +1,33 @@
-name: Deploy master branch
+name: Deploy dev branch
 
 on:
   push:
     branches:
-      - master
+      - dev
 
 jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    env:
+      INIAD_OPENAI_API_KEY: ${{ secrets.INIAD_OPENAI_API_KEY }}
+      APP_ENV: "DEV"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run tests
+        run: bash test.sh
+
   deploy:
     name: deploy
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -26,9 +46,9 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
-      # - name: serverless config
-      #   run: npx serverless config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - name: serverless deploy
-        uses: serverless/github-action@v3.1
-        with:
-          args: deploy
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+      - name: Install Serverless Python Requirements Plugin
+        run: serverless plugin install --name serverless-python-requirements
+      - name: Deploy Serverless Service
+        run: serverless deploy --verbose --config serverless.yml
