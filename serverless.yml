@@ -7,6 +7,21 @@ provider:
   architecture: x86_64
   stage: dev
   region: us-east-1
+  httpApi:
+    cors:
+      allowedOrigins:
+        - https://omochifestival.com/
+        - https://misskey.io/
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - PUT
+        - POST
+      allowCredentials: true
+      exposedResponseHeaders:
+        - Special-Response-Header
+      maxAge: 6000
 
 package:
   patterns:
