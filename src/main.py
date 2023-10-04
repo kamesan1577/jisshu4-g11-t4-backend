@@ -21,7 +21,7 @@ else:
     app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://omochifestival.com", "https://misskey.io"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
