@@ -60,7 +60,7 @@ jobs:
       - name: Check for changes in serverless.yml
         id: diff-check
         run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'serverless.yml'
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'serverless.yml' || true
           if [ $? -eq 0 ]; then
             echo "::set-output name=deploy_cmd::serverless deploy --verbose --config serverless.yml"
           else
