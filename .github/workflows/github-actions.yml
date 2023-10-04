@@ -55,5 +55,14 @@ jobs:
         run: npm install -g serverless
       - name: Install Serverless Python Requirements Plugin
         run: serverless plugin install --name serverless-python-requirements
+      - name: Check for changes in serverless.yml
+        id: diff-check
+        run: |
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'serverless.yml'
+          if [ $? -eq 0 ]; then
+            echo "::set-output name=deploy_cmd::serverless deploy --verbose --config serverless.yml"
+          else
+            echo "::set-output name=deploy_cmd::serverless deploy function --verbose --config serverless.yml"
+          fi
       - name: Deploy Serverless Service
-        run: serverless deploy --verbose --config serverless.yml
+        run: ${{ steps.diff-check.outputs.deploy_cmd }}
