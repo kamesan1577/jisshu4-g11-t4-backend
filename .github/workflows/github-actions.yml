@@ -63,8 +63,8 @@ jobs:
           echo "Before SHA: ${{ github.event.before }}"
           echo "Current SHA: ${{ github.sha }}"
           git diff --name-only ${{ github.event.before }} ${{ github.sha }}
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'serverless.yml'
-          if [ $? -eq 0 ]; then
+          DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'serverless.yml' || true)
+          if [ -n "$DIFF" ]; then
             echo "::set-output name=deploy_cmd::serverless deploy --verbose --config serverless.yml"
           else
             echo "::set-output name=deploy_cmd::serverless deploy function --verbose --config serverless.yml"
