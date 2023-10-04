@@ -67,7 +67,7 @@ jobs:
           if [ -n "$DIFF" ]; then
             echo "::set-output name=deploy_cmd::serverless deploy --verbose --config serverless.yml"
           else
-            echo "::set-output name=deploy_cmd::serverless deploy function --verbose --config serverless.yml"
+            echo "::set-output name=deploy_cmd::serverless deploy --function --verbose --config serverless.yml"
           fi
       - name: Deploy Serverless Service
         run: ${{ steps.diff-check.outputs.deploy_cmd }}
