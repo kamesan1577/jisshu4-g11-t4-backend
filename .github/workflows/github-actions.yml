@@ -42,8 +42,6 @@ jobs:
         node-version: [16.x]
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
@@ -57,17 +55,5 @@ jobs:
         run: npm install -g serverless
       - name: Install Serverless Python Requirements Plugin
         run: serverless plugin install --name serverless-python-requirements
-      - name: Check for changes in serverless.yml
-        id: diff-check
-        run: |
-          echo "Before SHA: ${{ github.event.before }}"
-          echo "Current SHA: ${{ github.sha }}"
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }}
-          DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'serverless.yml' || true)
-          if [ -n "$DIFF" ]; then
-            echo "::set-output name=deploy_cmd::serverless deploy --verbose --config serverless.yml"
-          else
-            echo "::set-output name=deploy_cmd::serverless deploy --function service --verbose --config serverless.yml"
-          fi
       - name: Deploy Serverless Service
-        run: ${{ steps.diff-check.outputs.deploy_cmd }}
+        run: serverless deploy --verbose --config serverless.yml
