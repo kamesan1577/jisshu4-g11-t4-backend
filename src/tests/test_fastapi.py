@@ -146,3 +146,33 @@ def test_error_data_collection():
         },
     )
     assert response.status_code == 422
+
+
+def test_moderation_suggest():
+    response = client.post(
+        "/moderations/suggestions",
+        json={
+            "prompt": "これはテストです。",
+            "user_id": "test",
+            "model": "gpt-3.5-turbo",
+            "response_language": "日本語",
+        },
+    )
+    assert response.status_code == 200
+    assert (
+        "suggestions" in response.json()
+        and type(response.json()["suggestions"]) == list
+    )
+
+
+def test_error_moderation_suggest():
+    response = client.post(
+        "/moderations/suggestions",
+        json={
+            "prompt": 123,
+            "user_id": "test",
+            "model": "gpt-3.5-turbo",
+            "response_language": "日本語",
+        },
+    )
+    assert response.status_code == 422

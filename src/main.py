@@ -1,7 +1,7 @@
 import os
 import logging
 import json
-from .lib import chat_api, tweet, data_collection
+from .lib import chat_api, tweet, data_collection, suggestion_api
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from mangum import Mangum
@@ -44,9 +44,30 @@ async def post_completion(
     tweet: tweet.Tweet,
 ):
     # プロンプトをリストで渡した場合はスレッドとして扱う
-    return chat_api.chat_modelate(
+    response = chat_api.chat_modelate(
         tweet.prompt, tweet.user_id, tweet.model, tweet.response_language
     )
+    return {"response": response}
+
+
+# ツイートの修正を提案
+@app.post("/moderations/suggestions")
+async def post_suggestions(
+    tweet: tweet.Tweet,
+):
+    post = ""
+    if type(tweet.prompt) is list:
+        post = tweet.prompt[-1]
+    else:
+        post = tweet.prompt
+
+    try:
+        # 修正対象の単語のリストを返す
+        hidden_words = suggestion_api.get_hidden_words(post)
+        return {"suggestions": hidden_words}
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Suggestion failed")
 
 
 # 隠された文字列の統計情報をログに送信

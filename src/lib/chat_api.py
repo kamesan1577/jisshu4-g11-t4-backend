@@ -185,7 +185,7 @@ def chat_modelate(prompt, user_id, model, response_language):
                 "response_content": response_content,
             }
             logger.info(json.dumps(response_log))  # Log the response in JSON format
-            return {"response": response_content}
+            return response_content
         else:
             error_log = {"user_id": user_id, "error": "ChatGPT API request failed"}
             logger.error(json.dumps(error_log))  # Log the error in JSON format
