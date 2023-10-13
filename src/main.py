@@ -1,7 +1,7 @@
 import os
 import logging
 import json
-from .lib import chat_api, tweet, data_collection, suggestion_api
+from .lib import chat_api, models, suggestion_api
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from mangum import Mangum
@@ -41,29 +41,21 @@ def read_root():
 # ツイートの修正
 @app.post("/moderations")
 async def post_completion(
-    tweet: tweet.Tweet,
+    request: models.ModerationsRequest,
 ):
     # プロンプトをリストで渡した場合はスレッドとして扱う
     response = chat_api.chat_modelate(
-        tweet.prompt, tweet.user_id, tweet.model, tweet.response_language
+        request.prompt, request.user_id, request.model, request.response_language
     )
     return {"response": response}
 
 
 # ツイートの修正を提案
 @app.post("/moderations/suggestions")
-async def post_suggestions(
-    tweet: tweet.Tweet,
-):
-    post = ""
-    if type(tweet.prompt) is list:
-        post = tweet.prompt[-1]
-    else:
-        post = tweet.prompt
-
+async def post_suggestions(prompt: models.SuggestionsRequest):
     try:
         # 修正対象の単語のリストを返す
-        hidden_words = suggestion_api.get_hidden_words(post)
+        hidden_words = suggestion_api.get_hidden_words(prompt)
         return {"suggestions": hidden_words}
     except Exception as e:
         logging.error(e)
@@ -73,7 +65,7 @@ async def post_suggestions(
 # 隠された文字列の統計情報をログに送信
 @app.post("/hidden-text-collection")
 async def post_hidden_text_collection(
-    hidden_chars: data_collection.HiddenChars,
+    hidden_chars: models.HiddenChars,
 ):
     try:
         logging.info(json.dumps(hidden_chars.dict()))

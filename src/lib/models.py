@@ -1,7 +1,8 @@
-# TODO validatorからfield_validatorに移行する
 from pydantic import BaseModel, validator
+from typing import Union
 
 
+# TODO validatorからfield_validatorに移行する
 class HiddenChars(BaseModel):
     """隠された文字列の情報を格納するモデル
 
@@ -30,3 +31,16 @@ class HiddenChars(BaseModel):
         if "original_text" in values:
             return len(values["original_text"])
         return v
+
+
+# 修正のリクエスト
+class ModerationsRequest(BaseModel):
+    prompt: Union[str, list[str]]
+    user_id: str
+    model: str = "gpt-3.5-turbo"
+    response_language: str = "日本語"
+
+
+# 修正提案のリクエスト
+class SuggestionsRequest(BaseModel):
+    prompt: str

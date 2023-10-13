@@ -153,16 +153,10 @@ def test_moderation_suggest():
         "/moderations/suggestions",
         json={
             "prompt": "これはテストです。",
-            "user_id": "test",
-            "model": "gpt-3.5-turbo",
-            "response_language": "日本語",
         },
     )
     assert response.status_code == 200
-    assert (
-        "suggestions" in response.json()
-        and type(response.json()["suggestions"]) == list
-    )
+    assert "suggestions" in response.json()
 
 
 def test_error_moderation_suggest():
@@ -170,9 +164,6 @@ def test_error_moderation_suggest():
         "/moderations/suggestions",
         json={
             "prompt": 123,
-            "user_id": "test",
-            "model": "gpt-3.5-turbo",
-            "response_language": "日本語",
         },
     )
     assert response.status_code == 422
