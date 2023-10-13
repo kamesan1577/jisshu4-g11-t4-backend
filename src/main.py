@@ -1,7 +1,6 @@
 import os
 import logging
 import json
-import httpx
 from .lib import chat_api, models, suggestion_api
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
@@ -22,7 +21,11 @@ else:
     app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://omochifestival.com", "https://misskey.io"],
+    allow_origins=[
+        "https://omochifestival.com",
+        "https://misskey.io",
+        "http://localhost*",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
