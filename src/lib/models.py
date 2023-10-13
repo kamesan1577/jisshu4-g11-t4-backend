@@ -44,3 +44,4 @@ class ModerationsRequest(BaseModel):
 # 修正提案のリクエスト
 class SuggestionsRequest(BaseModel):
     prompt: str
+    user_id: str

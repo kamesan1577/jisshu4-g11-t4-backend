@@ -153,6 +153,7 @@ def test_moderation_suggest():
         "/moderations/suggestions",
         json={
             "prompt": "これはテストです。",
+            "user_id": "test",
         },
     )
     assert response.status_code == 200
@@ -164,6 +165,7 @@ def test_error_moderation_suggest():
         "/moderations/suggestions",
         json={
             "prompt": 123,
+            "user_id": "test",
         },
     )
     assert response.status_code == 422

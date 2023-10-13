@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import httpx
 from .lib import chat_api, models, suggestion_api
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
@@ -52,10 +53,17 @@ async def post_completion(
 
 # ツイートの修正を提案
 @app.post("/moderations/suggestions")
-async def post_suggestions(prompt: models.SuggestionsRequest):
+async def post_suggestions(request: models.SuggestionsRequest):
     try:
         # 修正対象の単語のリストを返す
-        hidden_words = suggestion_api.get_hidden_words(prompt)
+        hidden_words = suggestion_api.get_hidden_words(request)
+        post_hidden_text_collection(
+            models.HiddenChars(
+                user_id=request.user_id,
+                original_text=request.prompt,
+                hidden_texts=hidden_words,
+            )
+        )
         return {"suggestions": hidden_words}
     except Exception as e:
         logging.error(e)
