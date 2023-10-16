@@ -91,7 +91,7 @@ def test_error_chat_modelate():
 # 隠された文字列の統計情報の正常系テスト
 def test_data_collection():
     response = client.post(
-        "/hidden-text-collection",
+        "/poc/hidden-text-collection",
         json={
             "user_id": "test",
             "original_text": "これはテストです。",
@@ -101,7 +101,7 @@ def test_data_collection():
     assert response.status_code == 200
 
     response = client.post(
-        "/hidden-text-collection",
+        "/poc/hidden-text-collection",
         json={
             "user_id": "test",
             "original_text": "これはテストです。",
@@ -113,7 +113,7 @@ def test_data_collection():
     assert response.status_code == 200
 
     response = client.post(
-        "/hidden-text-collection",
+        "/poc/hidden-text-collection",
         json={
             "user_id": "test",
             "original_text": "これはテストです。",
@@ -128,7 +128,7 @@ def test_data_collection():
 # 隠された文字列の統計情報の異常系テスト
 def test_error_data_collection():
     response = client.post(
-        "/hidden-text-collection",
+        "/poc/hidden-text-collection",
         json={
             "user_id": "test",
             "original_text": "これはテストです。",
@@ -138,7 +138,7 @@ def test_error_data_collection():
     assert response.status_code == 422
 
     response = client.post(
-        "/hidden-text-collection",
+        "/poc/hidden-text-collection",
         json={
             "user_id": "test",
             "original_text": "これはテストです。",

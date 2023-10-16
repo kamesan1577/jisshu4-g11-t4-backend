@@ -45,3 +45,8 @@ class ModerationsRequest(BaseModel):
 class SuggestionsRequest(BaseModel):
     prompt: str
     user_id: str
+
+
+# 提案受け入れ記録のリクエスト
+class IsAcceptedSuggestionRequest(HiddenChars):
+    is_accepted: bool

@@ -75,8 +75,21 @@ async def post_suggestions(request: models.SuggestionsRequest):
         raise HTTPException(status_code=500, detail="Suggestion failed")
 
 
+# ツイートの修正を受け入れたかどうかをログに送信
+@app.post("/poc/suggest-acceptance-collection")
+async def post_is_accepted_suggestion(
+    request: models.IsAcceptedSuggestionRequest,
+):
+    try:
+        logging.info(json.dumps(request.dict()))
+        return {"message": "success", "is_accepted": request.is_accepted}
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Log send failed")
+
+
 # 隠された文字列の統計情報をログに送信
-@app.post("/hidden-text-collection")
+@app.post("/poc/hidden-text-collection")
 async def post_hidden_text_collection(
     hidden_chars: models.HiddenChars,
 ):
