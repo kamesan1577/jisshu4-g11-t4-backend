@@ -59,7 +59,7 @@ async def post_completion(
 async def post_suggestions(request: models.SuggestionsRequest):
     try:
         # 修正対象の単語のリストを返す
-        hidden_words = suggestion_api.get_hidden_words(request)
+        hidden_words = suggestion_api.get_hidden_words(request.prompt)
 
         # 実行と同時にログに流す
         post_hidden_text_collection(
