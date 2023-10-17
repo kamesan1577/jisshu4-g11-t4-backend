@@ -62,13 +62,17 @@ async def post_suggestions(request: models.SuggestionsRequest):
         hidden_words = suggestion_api.get_hidden_words(request.prompt)
 
         # 実行と同時にログに流す
-        post_hidden_text_collection(
-            models.HiddenChars(
-                user_id=request.user_id,
-                original_text=request.prompt,
-                hidden_texts=hidden_words,
-            )
-        )
+        log = models.SuggestionsLog(
+            user_id=request.user_id,
+            post_id="hoge",
+            original_text=request.prompt,
+            hidden_texts=hidden_words,
+        ).model_dump()
+        try:
+            logging.info(json.dumps(log))
+        except Exception as e:
+            logging.error(e)
+            raise HTTPException(status_code=500, detail="Log send failed")
         return {"suggestions": hidden_words}
     except Exception as e:
         logging.error(e)
@@ -96,22 +100,22 @@ async def post_is_accepted_suggestion(
 
 
 # 隠された文字列の統計情報をログに送信
-@app.post("/poc/hidden-text-collection")
-async def post_hidden_text_collection(
-    hidden_chars: models.HiddenChars,
-):
-    log = models.SuggestionsLog(
-        user_id=hidden_chars.user_id,
-        post_id="hoge",
-        original_text=hidden_chars.original_text,
-        hidden_texts=hidden_chars.hidden_texts,
-    ).model_dump()
-    try:
-        logging.info(json.dumps(log))
-        return {"message": "success"}
-    except Exception as e:
-        logging.error(e)
-        raise HTTPException(status_code=500, detail="Log send failed")
+# @app.post("/poc/hidden-text-collection")
+# async def post_hidden_text_collection(
+#     hidden_chars: models.HiddenChars,
+# ):
+#     log = models.SuggestionsLog(
+#         user_id=hidden_chars.user_id,
+#         post_id="hoge",
+#         original_text=hidden_chars.original_text,
+#         hidden_texts=hidden_chars.hidden_texts,
+#     ).model_dump()
+#     try:
+#         logging.info(json.dumps(log))
+#         return {"message": "success"}
+#     except Exception as e:
+#         logging.error(e)
+#         raise HTTPException(status_code=500, detail="Log send failed")
 
 
 handler = Mangum(app, lifespan="off")
