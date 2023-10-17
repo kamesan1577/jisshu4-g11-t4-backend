@@ -1,3 +1,4 @@
+from . import models
 import openai
 import logging
 import json
@@ -8,12 +9,13 @@ logger.setLevel(logging.INFO)
 
 
 def chat_modelate(prompt, user_id, model, response_language):
-    log_data = {
-        "user_id": user_id,
-        "prompt": prompt,
-        "model": model,
-        "response_language": response_language,
-    }
+    log_data = models.ModerationsLog(
+        prompt=prompt,
+        user_id=user_id,
+        model=model,
+        response_language=response_language,
+        post_id="hoge",
+    ).model_dump()
     logger.info(json.dumps(log_data))  # Logs the data in JSON format
 
     # リストで渡された場合はスレッドとして扱う

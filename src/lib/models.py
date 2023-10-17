@@ -50,3 +50,25 @@ class SuggestionsRequest(BaseModel):
 # 提案受け入れ記録のリクエスト
 class IsAcceptedSuggestionRequest(HiddenChars):
     is_accepted: bool
+
+
+# ログのテンプレート
+class BaseLog(BaseModel):
+    user_id: str
+    post_id: str
+    log_type: str
+
+
+# 投稿修正のログ
+class ModerationsLog(BaseLog, ModerationsRequest):
+    log_type: str = "moderation"
+
+
+# 提案修正のログ
+class SuggestionsLog(BaseLog, SuggestionsRequest):
+    log_type: str = "suggestion"
+
+
+# 提案受け入れ記録のログ
+class IsAcceptedSuggestionLog(BaseLog, IsAcceptedSuggestionRequest):
+    log_type: str = "is_accepted_suggestion"
