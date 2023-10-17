@@ -43,3 +43,6 @@
 5. ブラウザで http://localhost:8000/docs にアクセス
    <br>
    API の仕様書が表示されれば成功です。
+# 参考
+- https://developer.yahoo.co.jp/webapi/jlp/ma/v2/parse.html
+- http://monoroch.net/kinshi/
