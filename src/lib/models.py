@@ -16,22 +16,18 @@ class HiddenChars(BaseModel):
 
     user_id: str
     original_text: str
-    original_text_num: int = None
+    original_text_num: int = 0
     hidden_texts: list[str]
-    hidden_texts_num: int = None
+    hidden_texts_num: int = 0
 
     @validator("hidden_texts_num", pre=True, always=True)
     def set_hidden_texts_num(cls, v, values):
-        if v is None:
-            return 0
         if "hidden_texts" in values:
             return sum([len(c) for c in values["hidden_texts"]])
         return v
 
     @validator("original_text_num", pre=True, always=True)
     def set_original_text_num(cls, v, values):
-        if v is None:
-            return 0
         if "original_text" in values:
             return len(values["original_text"])
         return v
