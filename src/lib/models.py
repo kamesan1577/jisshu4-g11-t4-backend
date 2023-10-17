@@ -22,12 +22,16 @@ class HiddenChars(BaseModel):
 
     @validator("hidden_texts_num", pre=True, always=True)
     def set_hidden_texts_num(cls, v, values):
+        if v is None:
+            return 0
         if "hidden_texts" in values:
             return sum([len(c) for c in values["hidden_texts"]])
         return v
 
     @validator("original_text_num", pre=True, always=True)
     def set_original_text_num(cls, v, values):
+        if v is None:
+            return 0
         if "original_text" in values:
             return len(values["original_text"])
         return v

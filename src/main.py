@@ -88,7 +88,7 @@ async def post_is_accepted_suggestion(
         hidden_texts=request.hidden_texts,
     ).model_dump()
     try:
-        logging.info(log.json())
+        logging.info(json.dumps(log))
         return {"message": "success", "is_accepted": request.is_accepted}
     except Exception as e:
         logging.error(e)
