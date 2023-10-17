@@ -80,8 +80,15 @@ async def post_suggestions(request: models.SuggestionsRequest):
 async def post_is_accepted_suggestion(
     request: models.IsAcceptedSuggestionRequest,
 ):
+    log = models.IsAcceptedSuggestionLog(
+        user_id=request.user_id,
+        post_id="hoge",
+        is_accepted=request.is_accepted,
+        original_text=request.original_text,
+        hidden_texts=request.hidden_texts,
+    ).model_dump()
     try:
-        logging.info(json.dumps(request.dict()))
+        logging.info(log.json())
         return {"message": "success", "is_accepted": request.is_accepted}
     except Exception as e:
         logging.error(e)
@@ -93,8 +100,14 @@ async def post_is_accepted_suggestion(
 async def post_hidden_text_collection(
     hidden_chars: models.HiddenChars,
 ):
+    log = models.HiddenCharsLog(
+        user_id=hidden_chars.user_id,
+        post_id="hoge",
+        original_text=hidden_chars.original_text,
+        hidden_texts=hidden_chars.hidden_texts,
+    ).model_dump()
     try:
-        logging.info(json.dumps(hidden_chars.dict()))
+        logging.info(log.json())
         return {"message": "success"}
     except Exception as e:
         logging.error(e)
