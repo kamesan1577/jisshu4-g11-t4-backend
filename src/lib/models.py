@@ -59,9 +59,18 @@ class BaseLog(BaseModel):
     log_type: str
 
 
-# 投稿修正のログ
-class ModerationsLog(BaseLog, ModerationsRequest):
-    log_type: str = "moderation"
+# 投稿修正リクエストのログ
+class ModerationsRequestLog(BaseLog, ModerationsRequest):
+    log_type: str = "moderation_request"
+
+
+# 投稿修正レスポンスのログ
+class ModerationsResponseLog(
+    BaseLog,
+):
+    log_type: str = "moderation_response"
+    prompt: str
+    response: str
 
 
 # 提案修正のログ

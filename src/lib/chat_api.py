@@ -9,7 +9,7 @@ logger.setLevel(logging.INFO)
 
 
 def chat_modelate(prompt, user_id, model, response_language):
-    log_data = models.ModerationsLog(
+    log_data = models.ModerationsRequestLog(
         prompt=prompt,
         user_id=user_id,
         model=model,
@@ -181,11 +181,12 @@ def chat_modelate(prompt, user_id, model, response_language):
     try:
         if response.choices:
             response_content = response["choices"][0]["message"]["content"]
-            response_log = {
-                "user_id": user_id,
-                "request_content": user_prompt[-1]["content"],
-                "response_content": response_content,
-            }
+            response_log = models.ModerationsResponseLog(
+                user_id=user_id,
+                post_id="hoge",
+                prompt=user_prompt[-1]["content"],
+                response=response_content,
+            ).model_dump()
             logger.info(json.dumps(response_log))  # Log the response in JSON format
             return response_content
         else:
