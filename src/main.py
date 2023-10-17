@@ -100,14 +100,14 @@ async def post_is_accepted_suggestion(
 async def post_hidden_text_collection(
     hidden_chars: models.HiddenChars,
 ):
-    log = models.HiddenCharsLog(
+    log = models.SuggestionsLog(
         user_id=hidden_chars.user_id,
         post_id="hoge",
         original_text=hidden_chars.original_text,
         hidden_texts=hidden_chars.hidden_texts,
     ).model_dump()
     try:
-        logging.info(log.json())
+        logging.info(json.dumps(log))
         return {"message": "success"}
     except Exception as e:
         logging.error(e)

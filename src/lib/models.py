@@ -65,7 +65,7 @@ class ModerationsLog(BaseLog, ModerationsRequest):
 
 
 # 提案修正のログ
-class SuggestionsLog(BaseLog, SuggestionsRequest):
+class SuggestionsLog(BaseLog, HiddenChars):
     log_type: str = "suggestion"
 
 
