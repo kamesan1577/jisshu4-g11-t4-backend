@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, field_validator
 from typing import Union
 
 
@@ -77,6 +77,13 @@ class ModerationsResponseLog(
 # 提案修正のログ
 class SuggestionsLog(BaseLog, HiddenChars):
     log_type: str = "suggestion"
+    hidden_texts_str: str = ""
+
+    @field_validator("hidden_texts_str", mode="before")
+    def validate_hidden_texts_str(cls, v, values):
+        if "hidden_texts" in values:
+            return ",".join(values["hidden_texts"])
+        return v
 
 
 # 提案受け入れ記録のログ
