@@ -50,6 +50,7 @@ class SuggestionsRequest(BaseModel):
 # 提案受け入れ記録のリクエスト
 class IsAcceptedSuggestionRequest(HiddenChars):
     is_accepted: bool
+    is_edited_by_user: bool = False
 
 
 # ログのテンプレート

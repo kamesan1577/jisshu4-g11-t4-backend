@@ -88,6 +88,7 @@ async def post_is_accepted_suggestion(
         user_id=request.user_id,
         post_id="hoge",
         is_accepted=request.is_accepted,
+        is_edited_by_user=request.is_edited_by_user,
         original_text=request.original_text,
         hidden_texts=request.hidden_texts,
     ).model_dump()
