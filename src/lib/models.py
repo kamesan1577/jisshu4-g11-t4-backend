@@ -53,6 +53,18 @@ class IsAcceptedSuggestionRequest(HiddenChars):
     is_edited_by_user: bool = False
 
 
+# タイムラインの投稿修正リクエスト
+class TimeLineRequest(BaseModel):
+    propmts: list[str]
+    index: list[int] = []
+
+    @validator("index", pre=True, always=True)
+    def set_index(cls, v, values):
+        if "propmts" in values:
+            return list(range(len(values["propmts"])))
+        return v
+
+
 # ログのテンプレート
 class BaseLog(BaseModel):
     user_id: str
