@@ -49,6 +49,8 @@ def ketaiso_kaku(text: str, dir: bool = True):
     for item in moral_foundation_dic:
         if re.search(item[0], text_kakite):
             result.append(str(item[0]))
+    if result[0] == "":
+        result.pop(0)
     return result
 
 

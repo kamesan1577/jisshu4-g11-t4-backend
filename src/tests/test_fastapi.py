@@ -179,3 +179,13 @@ def test_error_moderation_suggest():
         },
     )
     assert response.status_code == 422
+
+    response = client.post(
+        "/moderations/suggestions",
+        json={
+            "prompt": "これはテストです。",
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 200
+    assert [] == response.json()["suggestions"]

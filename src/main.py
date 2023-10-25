@@ -79,6 +79,21 @@ async def post_suggestions(request: models.SuggestionsRequest):
         raise HTTPException(status_code=500, detail="Suggestion failed")
 
 
+@app.post("/redaction")
+async def post_redaction(
+    request: models.TimeLineRequest,
+):
+    try:
+        orginal = [post for post in request.propmts]
+        redacted = [suggestion_api.get_hidden_words(post) for post in request.propmts]
+        response = [{orginal[i]: redacted[i]} for i in range(len(orginal))]
+        return {"response": response}
+
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Redaction failed")
+
+
 # ツイートの修正を受け入れたかどうかをログに送信
 @app.post("/poc/suggest-acceptance-collection")
 async def post_is_accepted_suggestion(
