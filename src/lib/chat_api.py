@@ -70,3 +70,10 @@ def chat_modelate(prompt, user_id, model, response_language):
         error_log = {"user_id": user_id, "error": str(e)}
         logger.error(json.dumps(error_log))
         raise HTTPException(status_code=500, detail="Runtime error")
+
+
+def safety_scoring(prompt):
+    response = openai.Moderation.create(
+        input=prompt,
+    )
+    return response

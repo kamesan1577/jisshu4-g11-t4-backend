@@ -79,6 +79,28 @@ async def post_suggestions(request: models.SuggestionsRequest):
         raise HTTPException(status_code=500, detail="Suggestion failed")
 
 
+@app.post("/moderations/suggestions/safety")
+async def judge_safety(request: models.SuggestionsRequest):
+    try:
+        flag = suggestion_api.is_required_moderation(request.prompt)
+
+        # 実行と同時にログに流す
+        log = models.SafetyJudgementLog(
+            user_id=request.user_id,
+            post_id="hoge",
+            prompt=request.prompt,
+        ).model_dump()
+        try:
+            logging.info(json.dumps(log))
+        except Exception as e:
+            logging.error(e)
+            raise HTTPException(status_code=500, detail="Log send failed")
+        return {"is_required_moderation": flag}
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Safety judgement failed")
+
+
 # TLの検閲
 @app.post("/redaction")
 async def post_redaction(

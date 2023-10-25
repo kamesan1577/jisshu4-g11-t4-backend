@@ -98,6 +98,11 @@ class SuggestionsLog(BaseLog, HiddenChars):
         return v
 
 
+# 安全性判定のログ
+class SafetyJudgementLog(BaseLog, SuggestionsRequest):
+    log_type: str = "safety"
+
+
 # 提案受け入れ記録のログ
 class IsAcceptedSuggestionLog(BaseLog, IsAcceptedSuggestionRequest):
     log_type: str = "is_accepted_suggestion"

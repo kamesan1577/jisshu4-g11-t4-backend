@@ -189,3 +189,46 @@ def test_error_moderation_suggest():
     )
     assert response.status_code == 200
     assert [] == response.json()["suggestions"]
+
+
+def test_safety_judgement():
+    response = client.post(
+        "/moderations/suggestions/safety",
+        json={
+            "prompt": "これはテストです。",
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 200
+    assert "is_required_moderation" in response.json()
+
+    response = client.post(
+        "/moderations/suggestions/safety",
+        json={
+            "prompt": "お前を殺す",
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["is_required_moderation"]
+
+
+def test_error_safety_judgement():
+    response = client.post(
+        "/moderations/suggestions/safety",
+        json={
+            "prompt": 123,
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 422
+
+    response = client.post(
+        "/moderations/suggestions/safety",
+        json={
+            "prompt": "これはテストです。",
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 200
+    assert not response.json()["is_required_moderation"]
