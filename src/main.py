@@ -79,6 +79,7 @@ async def post_suggestions(request: models.SuggestionsRequest):
         raise HTTPException(status_code=500, detail="Suggestion failed")
 
 
+# TLの検閲
 @app.post("/redaction")
 async def post_redaction(
     request: models.TimeLineRequest,
