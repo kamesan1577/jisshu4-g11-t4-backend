@@ -55,13 +55,13 @@ class IsAcceptedSuggestionRequest(HiddenChars):
 
 # タイムラインの投稿修正リクエスト
 class TimeLineRequest(BaseModel):
-    propmts: list[str]
+    prompts: list[str]
     index: list[int] = []
 
     @validator("index", pre=True, always=True)
     def set_index(cls, v, values):
-        if "propmts" in values:
-            return list(range(len(values["propmts"])))
+        if "prompts" in values:
+            return list(range(len(values["prompts"])))
         return v
 
 

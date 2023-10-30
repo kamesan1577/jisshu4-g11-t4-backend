@@ -107,8 +107,8 @@ async def post_redaction(
     request: models.TimeLineRequest,
 ):
     try:
-        orginal = [post for post in request.propmts]
-        redacted = [suggestion_api.get_hidden_words(post) for post in request.propmts]
+        orginal = [post for post in request.prompts]
+        redacted = [suggestion_api.get_hidden_words(post) for post in request.prompts]
         response = [{orginal[i]: redacted[i]} for i in range(len(orginal))]
         return {"response": response}
 
