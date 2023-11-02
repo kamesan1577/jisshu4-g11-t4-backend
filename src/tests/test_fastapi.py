@@ -1,4 +1,5 @@
 from .. import main
+import uuid
 from fastapi.testclient import TestClient
 
 client = TestClient(main.app)
@@ -169,6 +170,17 @@ def test_moderation_suggest():
     assert response.status_code == 200
     assert "バカ" in response.json()["suggestions"]
 
+    random_str = str(uuid.uuid4())
+    response = client.post(
+        "/moderations/suggestions",
+        json={
+            "prompt": random_str,
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 200
+    assert "suggestions" in response.json()
+
 
 def test_error_moderation_suggest():
     response = client.post(
@@ -232,3 +244,36 @@ def test_error_safety_judgement():
     )
     assert response.status_code == 200
     assert not response.json()["is_required_moderation"]
+
+
+def test_redaction():
+    response = client.post(
+        "/redaction",
+        json={
+            "prompts": ["これはテストです。", "これはテストです。"],
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 200
+    assert "response" in response.json()
+
+    response = client.post(
+        "/redaction",
+        json={
+            "prompts": ["お前を殺す"],
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 200
+    assert "殺す" in response.json()["response"][0]["hidden"]
+
+
+def test_error_redaction():
+    response = client.post(
+        "/redaction",
+        json={
+            "prompts": ["これはテストです。", 123],
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 422
