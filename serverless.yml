@@ -7,6 +7,12 @@ provider:
   architecture: x86_64
   stage: dev
   region: us-east-1
+  vpc:
+    securityGroupIds:
+      - sg-056d81122c8bb8c7b
+    subnetIds:
+      - subnet-087c042ed1da69f52
+      - subnet-049a12748ad83ee41
 
 package:
   patterns:
@@ -21,6 +27,9 @@ functions:
           path: /{path+}
           method: ANY
           cors: true
+    environment:
+      REDIS_ENDPOINT: jisshu-cache.xhd2ew.clustercfg.use1.cache.amazonaws.com
+      REDIS_PORT: 6379
 
 plugins:
   - serverless-python-requirements

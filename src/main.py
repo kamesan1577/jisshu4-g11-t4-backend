@@ -1,5 +1,6 @@
 import os
 import logging
+import hashlib
 import json
 from .lib import chat_api, models, suggestion_api
 from fastapi import FastAPI, HTTPException
@@ -7,6 +8,7 @@ from starlette.middleware.cors import CORSMiddleware
 from mangum import Mangum
 import openai
 from dotenv import load_dotenv
+import redis
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -35,6 +37,11 @@ load_dotenv(verbose=True)
 openai.api_key = os.environ.get("INIAD_OPENAI_API_KEY")
 openai.api_base = "https://api.openai.iniad.org/api/v1"
 
+REDIS_HOST = os.environ.get("REDIS_HOST")
+REDIS_PORT = os.environ.get("REDIS_PORT")
+
+redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
+
 
 # lambdaにデプロイすると動かない(そもそもいらない気がするけど)
 @app.get("/")
@@ -54,12 +61,20 @@ async def post_completion(
     return {"response": response}
 
 
-# ツイートの修正を提案
+# ツイートの修正が必要かどうかを判定(list[str])
 @app.post("/moderations/suggestions")
 async def post_suggestions(request: models.SuggestionsRequest):
     try:
-        # 修正対象の単語のリストを返す
-        hidden_words = suggestion_api.get_hidden_words(request.prompt)
+        hash_key = hashlib.sha256((request.prompt + "suggestions").encode()).hexdigest()
+        cached = redis_client.get(hash_key)
+
+        if cached:
+            hidden_words = json.loads(cached.decode("utf-8"))["suggestions"]
+            print("cache hit")
+        else:
+            # 修正対象の単語のリストを返す
+            hidden_words = suggestion_api.get_hidden_words(request.prompt)
+            redis_client.set(hash_key, json.dumps({"suggestions": hidden_words}))
 
         # 実行と同時にログに流す
         log = models.SuggestionsLog(
@@ -79,6 +94,7 @@ async def post_suggestions(request: models.SuggestionsRequest):
         raise HTTPException(status_code=500, detail="Suggestion failed")
 
 
+# ツイートの修正が必要かどうかを判定(boolean)
 @app.post("/moderations/suggestions/safety")
 async def judge_safety(request: models.SuggestionsRequest):
     try:
@@ -107,11 +123,22 @@ async def post_redaction(
     request: models.TimeLineRequest,
 ):
     try:
-        original = [post for post in request.prompts]
-        hidden = [suggestion_api.get_hidden_words(post) for post in request.prompts]
-        response = [
-            {"original": original[i], "hidden": hidden[i]} for i in range(len(original))
-        ]
+        response = []
+        for post in request.prompts:
+            # TODO コードが書き換わったときにキャッシュを消す
+            hash_key = hashlib.sha256((post + "redaction").encode()).hexdigest()
+
+            cached = redis_client.get(hash_key)
+
+            if cached:
+                hidden_text = json.loads(cached.decode("utf-8"))["hidden"]
+                print("cache hit")
+                response.append({"original": post, "hidden": hidden_text})
+            else:
+                hidden_text = suggestion_api.get_hidden_words(post)
+                redis_client.set(hash_key, json.dumps({"hidden": hidden_text}))
+                response.append({"original": post, "hidden": hidden_text})
+
         return {"response": response}
 
     except Exception as e:
