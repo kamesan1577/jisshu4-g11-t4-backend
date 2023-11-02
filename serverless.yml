@@ -27,9 +27,6 @@ functions:
           path: /{path+}
           method: ANY
           cors: true
-    environment:
-      REDIS_ENDPOINT: jisshu-cache.xhd2ew.clustercfg.use1.cache.amazonaws.com
-      REDIS_PORT: 6379
 
 plugins:
   - serverless-python-requirements
