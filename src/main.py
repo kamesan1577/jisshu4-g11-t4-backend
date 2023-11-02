@@ -38,7 +38,7 @@ openai.api_key = os.environ.get("INIAD_OPENAI_API_KEY")
 openai.api_base = "https://api.openai.iniad.org/api/v1"
 
 REDIS_HOST = os.environ.get("REDIS_HOST")
-REDIS_PORT = os.environ.get("REDIS_PORT")
+REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
 
 redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
