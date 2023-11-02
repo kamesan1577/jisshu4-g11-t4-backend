@@ -22,8 +22,6 @@ functions:
           method: ANY
           cors: true
 
-
-
 plugins:
   - serverless-python-requirements
 
@@ -31,3 +29,5 @@ custom:
   pythonRequirements:
     dockerImage: public.ecr.aws/sam/build-python3.11:latest-x86_64
     dockerizePip: true
+    useDownloadCache: true
+    useStaticCache: true
