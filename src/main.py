@@ -3,6 +3,7 @@ import logging
 import hashlib
 import json
 from .lib import chat_api, models, suggestion_api
+from .lib.db_client import db_instance
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from mangum import Mangum

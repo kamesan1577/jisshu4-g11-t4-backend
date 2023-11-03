@@ -3,23 +3,27 @@ import re
 import json
 import csv
 import os
+from .db_client import db_instance
 from dotenv import load_dotenv
 from httpx import request
 
-# import pandas as pd
+# csv_in = "src/csv/kinshi.csv"
+# with open(csv_in, "r", encoding="utf-8") as f:
+#     reader = csv.reader(f)
+#     moral_foundation_dic = [row for row in reader]
+# print(moral_foundation_dic)
+# load_dotenv(verbose=True)
 
-# t = Tokenizer()
-csv_in = "src/csv/kinshi.csv"
-with open(csv_in, "r", encoding="utf-8") as f:
-    reader = csv.reader(f)
-    moral_foundation_dic = [row for row in reader]
-load_dotenv(verbose=True)
+# google spreadsheetから読み込む
+WORKSHEET_NAME = "シート1"
+moral_foundation_dic = db_instance.fetch_sheet_value(WORKSHEET_NAME)
+# print(moral_foundation_dic)
+
 CLIENT_ID = os.environ.get("YAHOO_CLIENT_ID")
 BASE_URL = "https://jlp.yahooapis.jp/MAService/V2/parse"
-# df = pd.read_csv(csv_in, sep=",", skiprows=0, header=0)
 
 
-def ketaiso_kaku(text: str, dir: bool = True):
+def ketaiso(text: str, dir: bool = True):
     if dir:
         text_dir = text
         text_kakite = open(text_dir, encoding="utf8").read()
@@ -52,25 +56,6 @@ def ketaiso_kaku(text: str, dir: bool = True):
     return result
 
 
-# def ketaiso_kaku(text: str, dir: bool = True):
-#     # 道徳基盤辞書
-#     result = []
-#     if dir:
-#         text_dir = text
-#         text_kakite = open(text_dir, encoding="utf8").read()
-#     else:
-#         text_kakite = text
-#     n = -1
-#     for tokens in t.tokenize(text_kakite):
-#         if "命令" in tokens.infl_form:
-#             result.append(tokens.surface)
-#     for item in df["見出し"]:
-#         n += 1
-#         if re.search(df.iloc[n, 0], text_kakite):
-#             result.append(str(df.iloc[n, 0]))
-#     return result
-
-
 if __name__ == "__main__":
-    print(ketaiso_kaku("src/sample_text/tweet.txt"))
+    print(ketaiso("src/sample_text/tweet.txt"))
     # 　呼び出し
