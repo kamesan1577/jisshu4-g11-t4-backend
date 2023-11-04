@@ -1,3 +1,5 @@
+from . import models
+import os
 import openai
 import logging
 import json
@@ -6,26 +8,34 @@ from fastapi import HTTPException
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+sys_prompt_single_post_path = os.path.join(
+    os.path.dirname(__file__), "../prompt/modelation_single.txt"
+)
+sys_prompt_thread_path = os.path.join(
+    os.path.dirname(__file__), "../prompt/modelation_thread.txt"
+)
+
+sys_prompt_single_post = open(sys_prompt_single_post_path, "r").read()
+sys_prompt_thread = open(sys_prompt_thread_path, "r").read()
+
 
 def chat_modelate(prompt, user_id, model, response_language):
-    log_data = {
-        "user_id": user_id,
-        "prompt": prompt,
-        "model": model,
-        "response_language": response_language,
-    }
-
+    log_data = models.ModerationsRequestLog(
+        prompt=prompt,
+        user_id=user_id,
+        model=model,
+        response_language=response_language,
+        post_id="hoge",
+    ).model_dump()
     logger.info(json.dumps(log_data))  # Logs the data in JSON format
-    if type(prompt) != list:
+
+    # リストで渡された場合はスレッドとして扱う
+    if type(prompt) is not list:
         system_prompt = {
             "role": "system",
             "content": f"""
                         {response_language}で返答してください。
-                        あなたはTwitterの投稿を検閲する拡張機能です。
-                        ユーザーの入力テキストから誹謗中傷や暴言を検出し、それを適切な表現に修正してください。文の意味やニュアンスを保持しつつ、攻撃的な言葉や表現を和らげるような形に変換してください。
-                        不適切な言葉が含まれている場合でも、文の意味が伝わるように修正してください。
-                        もし不適切な表現が含まれていない場合は、変換を行わずにそのまま返答してください。
-                        返答には変換結果のみを含んでください。
+                        {sys_prompt_single_post}
         """,
         }
         user_prompt = [{"role": "user", "content": prompt}]
@@ -34,13 +44,7 @@ def chat_modelate(prompt, user_id, model, response_language):
             "role": "system",
             "content": f"""
                     {response_language}で返答してください。
-                    あなたはTwitterの投稿を検閲する拡張機能です。
-                    ユーザーの入力テキストから誹謗中傷や暴言を検出し、それを適切な表現に修正してください。文の意味やニュアンスを保持しつつ、攻撃的な言葉や表現を和らげるような形に変換してください。
-                    不適切な言葉が含まれている場合でも、文の意味が伝わるように修正してください。
-                    もし不適切な表現が含まれていない場合は、変換を行わずにそのまま返答してください。
-                    複数のプロンプトが入力された場合、最初に入力されたプロンプトを親ツイートとしたスレッドとして扱います。
-                    最後に入力されたプロンプトが現在入力中のツイートです。
-                    返答には入力中のツイートに対する変換結果のみを含んでください。
+                    {sys_prompt_thread}
         """,
         }
         user_prompt = [{"role": "user", "content": p} for p in prompt]
@@ -50,9 +54,14 @@ def chat_modelate(prompt, user_id, model, response_language):
     try:
         if response.choices:
             response_content = response["choices"][0]["message"]["content"]
-            response_log = {"user_id": user_id, "response_content": response_content}
+            response_log = models.ModerationsResponseLog(
+                user_id=user_id,
+                post_id="hoge",
+                prompt=user_prompt[-1]["content"],
+                response=response_content,
+            ).model_dump()
             logger.info(json.dumps(response_log))  # Log the response in JSON format
-            return {"response": response_content}
+            return response_content
         else:
             error_log = {"user_id": user_id, "error": "ChatGPT API request failed"}
             logger.error(json.dumps(error_log))  # Log the error in JSON format
@@ -61,3 +70,10 @@ def chat_modelate(prompt, user_id, model, response_language):
         error_log = {"user_id": user_id, "error": str(e)}
         logger.error(json.dumps(error_log))
         raise HTTPException(status_code=500, detail="Runtime error")
+
+
+def safety_scoring(prompt):
+    response = openai.Moderation.create(
+        input=prompt,
+    )
+    return response

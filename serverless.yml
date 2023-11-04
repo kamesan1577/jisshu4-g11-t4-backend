@@ -5,8 +5,14 @@ provider:
   name: aws
   runtime: python3.11
   architecture: x86_64
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: us-east-1
+  vpc:
+    securityGroupIds:
+      - sg-056d81122c8bb8c7b
+    subnetIds:
+      - subnet-087c042ed1da69f52
+      - subnet-049a12748ad83ee41
 
 package:
   patterns:
@@ -20,6 +26,7 @@ functions:
       - http:
           path: /{path+}
           method: ANY
+          cors: true
 
 plugins:
   - serverless-python-requirements
@@ -28,3 +35,5 @@ custom:
   pythonRequirements:
     dockerImage: public.ecr.aws/sam/build-python3.11:latest-x86_64
     dockerizePip: true
+    useDownloadCache: true
+    useStaticCache: true

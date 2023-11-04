@@ -1,9 +1,10 @@
-name: Deploy dev branch
+name: Deploy branch
 
 on:
   push:
     branches:
       - dev
+      - master
   pull_request:
     branches:
       - dev
@@ -16,16 +17,21 @@ jobs:
     env:
       INIAD_OPENAI_API_KEY: ${{ secrets.INIAD_OPENAI_API_KEY }}
       APP_ENV: "DEV"
+      REDIS_HOST: "localhost"
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.x"
+          python-version: "3.10"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Setup Redis
+        uses: shogo82148/actions-setup-redis@v1
+      - name: Start Redis
+        run: redis-server &
       - name: Run tests
         run: bash test.sh
 
@@ -55,5 +61,9 @@ jobs:
         run: npm install -g serverless
       - name: Install Serverless Python Requirements Plugin
         run: serverless plugin install --name serverless-python-requirements
-      - name: Deploy Serverless Service
-        run: serverless deploy --verbose --config serverless.yml
+      - name: Deploy Serverless Service to Dev
+        if: github.ref == 'refs/heads/dev'
+        run: serverless deploy --verbose --config serverless.yml --stage dev
+      - name: Deploy Serverless Service to Master
+        if: github.ref == 'refs/heads/master'
+        run: serverless deploy --verbose --config serverless.yml --stage master
