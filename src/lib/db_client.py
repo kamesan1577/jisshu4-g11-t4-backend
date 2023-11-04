@@ -1,6 +1,6 @@
 import gspread
 import os
-import json
+from .models import Sheet
 from dotenv import load_dotenv
 
 
@@ -11,6 +11,9 @@ class DBClient:
         self.sheet = gc.open_by_key(SHEET_KEY)
         print("init: ", self.sheet.title)
 
+    class SheetNotFoundError(Exception):
+        pass
+
     def fetch_sheet_value(self, sheet_name: str):
         """
         Args:
@@ -19,20 +22,26 @@ class DBClient:
         Returns:
             list: シートの全データをリストで返す
         """
-        worksheet = self.sheet.worksheet(sheet_name)
-        return worksheet.get_all_values()
+        try:
+            worksheet = self.sheet.worksheet(sheet_name)
+            return worksheet.get_all_values()
+        except gspread.exceptions.WorksheetNotFound:
+            raise self.SheetNotFoundError(f"シート名: {sheet_name} が見つかりませんでした。")
 
-    # TODO: 動くか不明
-    def add_sheet_value(self, sheet_name: str, value: list):
+    def add_sheet_value(self, sheet_name: str, data: Sheet):
         """
         Args:
             sheet_name (str): シート名
-            value (list): 追加する値
+            data (Sheet): 追加する値
 
         """
-        worksheet = self.sheet.worksheet(sheet_name)
-        worksheet.append_row(value)
-        return
+        try:
+            worksheet = self.sheet.worksheet(sheet_name)
+            row_data = list(data.model_dump().values())
+            worksheet.append_row(row_data)
+            return
+        except gspread.exceptions.WorksheetNotFound:
+            raise self.SheetNotFoundError(f"シート名: {sheet_name} が見つかりませんでした。")
 
 
 # import時にインスタンスを作成する

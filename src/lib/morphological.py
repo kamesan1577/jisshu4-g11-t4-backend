@@ -1,10 +1,8 @@
 # from janome.tokenizer import Tokenizer
 import re
 import json
-import csv
 import os
 from .db_client import db_instance
-from dotenv import load_dotenv
 from httpx import request
 
 # csv_in = "src/csv/kinshi.csv"

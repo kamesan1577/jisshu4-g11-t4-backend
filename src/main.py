@@ -168,6 +168,30 @@ async def post_is_accepted_suggestion(
         raise HTTPException(status_code=500, detail="Log send failed")
 
 
+@app.get("/moral-foundation/{sheet_name}/data")
+async def get_moral_foundation_data(sheet_name: str):
+    try:
+        data = db_instance.fetch_sheet_value(sheet_name)
+        return {"data": data}
+    except db_instance.SheetNotFoundError:
+        raise HTTPException(status_code=404, detail="Sheet not found")
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Data fetch failed")
+
+
+@app.post("/moral-foundation/{sheet_name}/data")
+async def post_moral_foundation_data(sheet_name: str, data: models.Sheet):
+    try:
+        db_instance.add_sheet_value(sheet_name, data)
+        return {"message": "success"}
+    except db_instance.SheetNotFoundError:
+        raise HTTPException(status_code=404, detail="Sheet not found")
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Data post failed")
+
+
 # 隠された文字列の統計情報をログに送信
 # @app.post("/poc/hidden-text-collection")
 # async def post_hidden_text_collection(
