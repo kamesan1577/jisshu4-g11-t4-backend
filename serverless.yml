@@ -5,7 +5,7 @@ provider:
   name: aws
   runtime: python3.11
   architecture: x86_64
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: us-east-1
   vpc:
     securityGroupIds:
