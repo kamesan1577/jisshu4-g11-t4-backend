@@ -18,7 +18,7 @@ if os.environ.get("APP_ENV") == "DEV":
 elif os.environ.get("APP_ENV") == "STAGE":
     app = FastAPI(openapi_prefix="/dev")
 elif os.environ.get("APP_ENV") == "PROD":
-    app = FastAPI(openapi_prefix="/prod")
+    app = FastAPI(openapi_prefix="/master")
 else:
     app = FastAPI()
 app.add_middleware(
