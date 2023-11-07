@@ -17,6 +17,10 @@ jobs:
       INIAD_OPENAI_API_KEY: ${{ secrets.INIAD_OPENAI_API_KEY }}
       APP_ENV: "DEV"
       REDIS_HOST: "localhost"
+      SHEET_KEY: ${{ secrets.SHEET_KEY }}
+      AWS_REGION: "us-east-1"
+      SHEET_SECRET_NAME: ${{ secrets.SHEET_SECRET_NAME }}
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
