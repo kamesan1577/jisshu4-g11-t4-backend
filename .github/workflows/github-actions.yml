@@ -18,9 +18,7 @@ jobs:
       APP_ENV: "ACTION"
       REDIS_HOST: "localhost"
       SHEET_KEY: ${{ secrets.SHEET_KEY }}
-      SHEET_SECRET: ${{ secrets.SHEET_SECRET }
-
-
+      SHEET_SECRET: ${{ secrets.SHEET_SECRET }}
 
     steps:
       - uses: actions/checkout@v3
