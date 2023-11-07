@@ -52,23 +52,33 @@ class DBClient:
             raise self.SheetNotFoundError(f"シート名: {sheet_name} が見つかりませんでした。")
 
     def _get_secret_json(self, param_name):
-        region_name = os.environ.get("AWS_REGION")
-        ssm = boto3.client("ssm", region_name=region_name)
+        app_env = os.environ.get("APP_ENV")
 
-        try:
-            response = ssm.get_parameter(
-                Name=param_name,
-                WithDecryption=True
-            )
+        if app_env == "ACTION":
+            sheet_secret = os.environ.get("SHEET_SECRET")
             try:
-                data = json.loads(response["Parameter"]["Value"])
+                data = json.loads(sheet_secret)
                 return data
             except json.JSONDecodeError as e:
                 logging.error("Invalid Json format")
                 raise ValueError("Invalid Json format") from e
-        except ClientError as e:
-            logging.error(f"Secret fetching error: {e}")
-            raise
+        else:
+            region_name = os.environ.get("AWS_REGION")
+            ssm = boto3.client("ssm", region_name=region_name)
+            try:
+                response = ssm.get_parameter(
+                    Name=param_name,
+                    WithDecryption=True
+                )
+                try:
+                    data = json.loads(response["Parameter"]["Value"])
+                    return data
+                except json.JSONDecodeError as e:
+                    logging.error("Invalid Json format")
+                    raise ValueError("Invalid Json format") from e
+            except ClientError as e:
+                logging.error(f"Secret fetching error: {e}")
+                raise
 
     def _save_secret_temp(self, data: dict) -> str:
         filename = "/tmp/sheet-secret.json"
