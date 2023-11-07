@@ -277,3 +277,18 @@ def test_error_redaction():
         },
     )
     assert response.status_code == 422
+
+
+def test_get_moral_foundation_data():
+    response = client.get(
+        "/moral-foundation/シート1/data",
+    )
+    assert response.status_code == 200
+    assert "data" in response.json()
+
+
+def test_error_get_moral_foundation_data():
+    response = client.get(
+        "/moral-foundation/存在しないシート/data",
+    )
+    assert response.status_code == 404

@@ -1,13 +1,21 @@
+import json
 import gspread
 import os
+import logging
 from .models import Sheet
 from dotenv import load_dotenv
+import boto3
+from botocore.exceptions import ClientError
+
+logging.basicConfig(level=logging.INFO)
 
 
 class DBClient:
     # FIXME 立ち上がりに数秒かかる
     def __init__(self, SHEET_KEY: str):
-        gc = gspread.service_account(filename="src/secret/sheet-secret.json")
+        secret = self._get_secret_json(os.environ.get("SHEET_SECRET_NAME"))
+        filename = self._save_secret_temp(secret)
+        gc = gspread.service_account(filename=filename)
         self.sheet = gc.open_by_key(SHEET_KEY)
         print("init: ", self.sheet.title)
 
@@ -42,6 +50,42 @@ class DBClient:
             return
         except gspread.exceptions.WorksheetNotFound:
             raise self.SheetNotFoundError(f"シート名: {sheet_name} が見つかりませんでした。")
+
+    def _get_secret_json(self, param_name):
+        region_name = os.environ.get("AWS_REGION")
+        ssm = boto3.client("ssm", region_name=region_name)
+
+        try:
+            response = ssm.get_parameter(
+                Name=param_name,
+                WithDecryption=True
+            )
+            try:
+                data = json.loads(response["Parameter"]["Value"])
+                return data
+            except json.JSONDecodeError as e:
+                logging.error("Invalid Json format")
+                raise ValueError("Invalid Json format") from e
+        except ClientError as e:
+            logging.error(f"Secret fetching error: {e}")
+            raise
+
+    def _save_secret_temp(self, data: dict) -> str:
+        filename = "/tmp/sheet-secret.json"
+
+        if not os.path.exists(filename):
+            try:
+                with open(filename, "w") as f:
+                    json.dump(data, f)
+                logging.info(f"Secret file {filename} saved successfully.")
+            except IOError as e:
+                logging.error(f"Failed to write to file: {e}")
+                raise
+            except Exception as e:
+                logging.error("Unexpected error")
+                raise
+
+        return filename
 
 
 # import時にインスタンスを作成する
