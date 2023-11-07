@@ -16,8 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       INIAD_OPENAI_API_KEY: ${{ secrets.INIAD_OPENAI_API_KEY }}
-      APP_ENV: "DEV"
+      APP_ENV: "ACTION"
       REDIS_HOST: "localhost"
+      SHEET_KEY: ${{ secrets.SHEET_KEY }}
+      SHEET_SECRET: ${{ secrets.SHEET_SECRET }}
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python

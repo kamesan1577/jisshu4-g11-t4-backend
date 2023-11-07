@@ -1,4 +1,4 @@
-from . import mk_func_kakite, chat_api
+from . import morphological, chat_api
 
 
 def is_required_moderation(prompt: str):
@@ -26,5 +26,5 @@ def get_hidden_words(prompt: str):
         list: 修正対象の単語のリスト
     """
 
-    suggestions = mk_func_kakite.ketaiso_kaku(prompt, dir=False)
+    suggestions = morphological.ketaiso(prompt, dir=False)
     return suggestions
