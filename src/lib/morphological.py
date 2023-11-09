@@ -21,8 +21,8 @@ CLIENT_ID = os.environ.get("YAHOO_CLIENT_ID")
 BASE_URL = "https://jlp.yahooapis.jp/MAService/V2/parse"
 
 
-def ketaiso(text: str, dir: bool = True):
-    if dir:
+def ketaiso(text: str, is_directry: bool = True) -> list:
+    if is_directry:
         text_dir = text
         text_kakite = open(text_dir, encoding="utf8").read()
     else:
