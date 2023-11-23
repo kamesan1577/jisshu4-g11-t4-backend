@@ -102,7 +102,18 @@ async def post_suggestions(request: models.SuggestionsRequest):
 @app.post("/moderations/suggestions/safety")
 async def judge_safety(request: models.SuggestionsRequest):
     try:
-        flag = suggestion_api.is_required_moderation(request.prompt)
+        hash_key = hashlib.sha256(
+            (request.prompt + "is_required_moderation").encode()
+        ).hexdigest()
+        cached = redis_client.get(hash_key)
+
+        if cached:
+            flag = json.loads(cached.decode("utf-8"))["is_required_moderation"]
+            logger.debug("cache hit")
+        else:
+            flag = suggestion_api.is_required_moderation(request.prompt)
+            redis_client.set(hash_key, json.dumps({"is_required_moderation": flag}))
+            redis_client.expire(hash_key, 60 * 60 * 24 * 7)
 
         # 実行と同時にログに流す
         log = models.SafetyJudgementLog(
