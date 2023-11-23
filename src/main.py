@@ -11,17 +11,20 @@ import openai
 from dotenv import load_dotenv
 import redis
 
-logger = logging.getLogger()
+logger = logging.getLogger("PocLog")
 logger.setLevel(logging.INFO)
 
 if os.environ.get("APP_ENV") == "DEV":
+    logger.setLevel(logging.DEBUG)
     app = FastAPI()
 elif os.environ.get("APP_ENV") == "STAGE":
     app = FastAPI(openapi_prefix="/dev")
 elif os.environ.get("APP_ENV") == "PROD":
+    logger.setLevel(logging.ERROR)
     app = FastAPI(openapi_prefix="/master")
 else:
     app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -71,7 +74,7 @@ async def post_suggestions(request: models.SuggestionsRequest):
 
         if cached:
             hidden_words = json.loads(cached.decode("utf-8"))["suggestions"]
-            print("cache hit")
+            # print("cache hit")
         else:
             # 修正対象の単語のリストを返す
             hidden_words = suggestion_api.get_hidden_words(request.prompt)
@@ -85,13 +88,13 @@ async def post_suggestions(request: models.SuggestionsRequest):
             hidden_texts=hidden_words,
         ).model_dump()
         try:
-            logging.info(json.dumps(log))
+            logger.info(json.dumps(log))
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
             raise HTTPException(status_code=500, detail="Log send failed")
         return {"suggestions": hidden_words}
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
         raise HTTPException(status_code=500, detail="Suggestion failed")
 
 
@@ -108,13 +111,13 @@ async def judge_safety(request: models.SuggestionsRequest):
             prompt=request.prompt,
         ).model_dump()
         try:
-            logging.info(json.dumps(log))
+            logger.info(json.dumps(log))
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
             raise HTTPException(status_code=500, detail="Log send failed")
         return {"is_required_moderation": flag}
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
         raise HTTPException(status_code=500, detail="Safety judgement failed")
 
 
@@ -133,7 +136,7 @@ async def post_redaction(
 
             if cached:
                 hidden_text = json.loads(cached.decode("utf-8"))["hidden"]
-                print("cache hit")
+                # print("cache hit")
                 response.append({"original": post, "hidden": hidden_text})
             else:
                 hidden_text = suggestion_api.get_hidden_words(post)
@@ -143,7 +146,7 @@ async def post_redaction(
         return {"response": response}
 
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
         raise HTTPException(status_code=500, detail="Redaction failed")
 
 
@@ -161,10 +164,10 @@ async def post_is_accepted_suggestion(
         hidden_texts=request.hidden_texts,
     ).model_dump()
     try:
-        logging.info(json.dumps(log))
+        logger.info(json.dumps(log))
         return {"message": "success", "is_accepted": request.is_accepted}
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
         raise HTTPException(status_code=500, detail="Log send failed")
 
 
@@ -176,7 +179,7 @@ async def get_moral_foundation_data(sheet_name: str):
     except db_instance.SheetNotFoundError:
         raise HTTPException(status_code=404, detail="Sheet not found")
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
         raise HTTPException(status_code=500, detail="Data fetch failed")
 
 
@@ -188,7 +191,7 @@ async def post_moral_foundation_data(sheet_name: str, data: models.Sheet):
     except db_instance.SheetNotFoundError:
         raise HTTPException(status_code=404, detail="Sheet not found")
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
         raise HTTPException(status_code=500, detail="Data post failed")
 
 
@@ -204,10 +207,10 @@ async def post_moral_foundation_data(sheet_name: str, data: models.Sheet):
 #         hidden_texts=hidden_chars.hidden_texts,
 #     ).model_dump()
 #     try:
-#         logging.info(json.dumps(log))
+#         logger.info(json.dumps(log))
 #         return {"message": "success"}
 #     except Exception as e:
-#         logging.error(e)
+#         logger.error(e)
 #         raise HTTPException(status_code=500, detail="Log send failed")
 
 

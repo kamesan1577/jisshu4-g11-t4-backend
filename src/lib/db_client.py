@@ -66,10 +66,7 @@ class DBClient:
             region_name = os.environ.get("AWS_REGION")
             ssm = boto3.client("ssm", region_name=region_name)
             try:
-                response = ssm.get_parameter(
-                    Name=param_name,
-                    WithDecryption=True
-                )
+                response = ssm.get_parameter(Name=param_name, WithDecryption=True)
                 try:
                     data = json.loads(response["Parameter"]["Value"])
                     return data
@@ -92,7 +89,7 @@ class DBClient:
                 logging.error(f"Failed to write to file: {e}")
                 raise
             except Exception as e:
-                logging.error("Unexpected error")
+                logging.error(f"Unexpected error: {e}")
                 raise
 
         return filename
