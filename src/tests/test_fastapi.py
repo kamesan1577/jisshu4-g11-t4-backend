@@ -181,6 +181,20 @@ def test_moderation_suggest():
     assert response.status_code == 200
     assert "suggestions" in response.json()
 
+    kusonaga_html = """
+    <span style="white-space: pre-wrap;"><a href="/tags/%E3%82%A6%E3%83%AB%E3%83%88%E3%83%A9%E3%82%B9%E3%83%BC%E3%83%91%E3%83%BC%E3%83%86%E3%82%B9%E3%83%88" class="" style="color: var(--hashtag);">#ウルトラスーパーテスト</a><div style="text-align: center;"> <span class="mfm-x2"><span style="display: inline-block; color: rgb(255, 0, 0);">君死にたまへ</span></span></div><div style="text-align: center;"><span class="mfm-x4"><img class="xeJ4G" src="https://misskey-20230703-164643.s3.amazonaws.com/omochimisskey/3f914ec3-fc6b-4587-81ff-d57481b8e813.gif" alt=":yosano_party:" title=":yosano_party:" decoding="async"></span></div></span>
+    """
+
+    respon = client.post(
+        "/moderations/suggestions",
+        json={
+            "prompt": kusonaga_html,
+            "user_id": "test",
+        },
+    )
+    assert response.status_code == 200
+    assert "suggestions" in response.json()
+
 
 def test_error_moderation_suggest():
     response = client.post(
@@ -277,3 +291,18 @@ def test_error_redaction():
         },
     )
     assert response.status_code == 422
+
+
+def test_get_moral_foundation_data():
+    response = client.get(
+        "/moral-foundation/シート1/data",
+    )
+    assert response.status_code == 200
+    assert "data" in response.json()
+
+
+def test_error_get_moral_foundation_data():
+    response = client.get(
+        "/moral-foundation/存在しないシート/data",
+    )
+    assert response.status_code == 404

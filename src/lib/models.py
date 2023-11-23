@@ -106,3 +106,11 @@ class SafetyJudgementLog(BaseLog, SuggestionsRequest):
 # 提案受け入れ記録のログ
 class IsAcceptedSuggestionLog(BaseLog, IsAcceptedSuggestionRequest):
     log_type: str = "is_accepted_suggestion"
+
+
+# スプレッドシートのデータモデル
+class Sheet(BaseModel):
+    word: str
+    ruby: str
+    alternative: str = ""
+    note: str = ""

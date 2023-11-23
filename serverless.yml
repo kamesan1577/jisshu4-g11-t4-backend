@@ -13,6 +13,13 @@ provider:
     subnetIds:
       - subnet-087c042ed1da69f52
       - subnet-049a12748ad83ee41
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "ssm:GetParameter"
+          Resource: "arn:aws:ssm:${self:provider.region}:068614236466:parameter/jisshu-sheet-secret"
 
 package:
   patterns:

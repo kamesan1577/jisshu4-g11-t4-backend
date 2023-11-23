@@ -5,7 +5,7 @@ import logging
 import json
 from fastapi import HTTPException
 
-logger = logging.getLogger()
+logger = logging.getLogger("PocLog")
 logger.setLevel(logging.INFO)
 
 sys_prompt_single_post_path = os.path.join(
