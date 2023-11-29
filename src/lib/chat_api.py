@@ -1,6 +1,6 @@
 from . import models
 import os
-import openai
+from openai import OpenAI
 import logging
 import json
 from fastapi import HTTPException
@@ -18,6 +18,10 @@ sys_prompt_thread_path = os.path.join(
 sys_prompt_single_post = open(sys_prompt_single_post_path, "r").read()
 sys_prompt_thread = open(sys_prompt_thread_path, "r").read()
 
+client = OpenAI(
+    api_key=os.environ.get("INIAD_OPENAI_API_KEY"),
+    base_url="https://api.openai.iniad.org/api/v1"
+)
 
 def chat_modelate(prompt, user_id, model, response_language):
     log_data = models.ModerationsRequestLog(
@@ -48,32 +52,33 @@ def chat_modelate(prompt, user_id, model, response_language):
         """,
         }
         user_prompt = [{"role": "user", "content": p} for p in prompt]
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model=model, messages=[system_prompt, *user_prompt]
     )
-    try:
-        if response.choices:
-            response_content = response["choices"][0]["message"]["content"]
-            response_log = models.ModerationsResponseLog(
-                user_id=user_id,
-                post_id="hoge",
-                prompt=user_prompt[-1]["content"],
-                response=response_content,
-            ).model_dump()
-            logger.info(json.dumps(response_log))  # Log the response in JSON format
-            return response_content
-        else:
-            error_log = {"user_id": user_id, "error": "ChatGPT API request failed"}
-            logger.error(json.dumps(error_log))  # Log the error in JSON format
-            raise HTTPException(status_code=500, detail="ChatGPT API request failed")
-    except Exception as e:
-        error_log = {"user_id": user_id, "error": str(e)}
-        logger.error(json.dumps(error_log))
-        raise HTTPException(status_code=500, detail="Runtime error")
+
+    if response.choices:
+        response_content = response.choices[0].message.content
+        response_log = models.ModerationsResponseLog(
+            user_id=user_id,
+            post_id="hoge",
+            prompt=user_prompt[-1]["content"],
+            response=response_content,
+        ).model_dump()
+        logger.info(json.dumps(response_log))  # Log the response in JSON format
+        return response_content
+    else:
+        error_log = {"user_id": user_id, "error": "ChatGPT API request failed"}
+        logger.error(json.dumps(error_log))  # Log the error in JSON format
+        raise HTTPException(status_code=500, detail="ChatGPT API request failed")
+    
 
 
 def safety_scoring(prompt):
-    response = openai.Moderation.create(
+    response = client.moderations.create(
         input=prompt,
     )
     return response
+
+def get_safety_level(prompt) -> json:
+    #TODO chat.completion経由で安全性のレベルをJSON形式でかえしてもらう
+    return 
