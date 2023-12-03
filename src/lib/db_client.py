@@ -10,7 +10,7 @@ from httpx import request
 
 logging.basicConfig(level=logging.INFO)
 
-
+# 使わない
 class DBClient:
     # FIXME 立ち上がりに数秒かかる
     def __init__(self, SHEET_KEY: str):

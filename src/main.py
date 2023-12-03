@@ -135,7 +135,7 @@ async def judge_safety(request: models.SuggestionsRequest):
         logger.error(e)
         raise HTTPException(status_code=500, detail="Safety judgement failed")
 
-# タイムラインの投稿に安全性のラベルを付与する
+# タイムラインの投稿に安全性のラベルを付与する(プロンプトを与えたgpt-3.5を使用したバージョン)
 @app.post("/moderations/suggestions/timeline-safety")
 async def judge_safety(request: models.TimeLineRequest,):
     try:
@@ -167,6 +167,37 @@ async def judge_safety(request: models.TimeLineRequest,):
         logger.error(e)
         raise HTTPException(status_code=500, detail="Safety judgement failed")
 
+# タイムラインの投稿に安全性のラベルを付与する(moderation APIを使用したバージョン)
+@app.post("/moderations/suggestions/timeline-safety-with-moderation-api")
+async def judge_safety(request: models.TimeLineRequest,):
+    try:
+        start_time = time.time()
+        response = []
+        for post in request.prompts:  
+            hash_key = hashlib.sha256(
+            (post + "safety_level_with_moderation_api").encode()
+            ).hexdigest()
+            cached = redis_client.get(hash_key)
+
+            if cached:
+                safety_level = json.loads(cached.decode("utf-8"))["level"]
+                logger.debug("cache hit")
+                response.append({"post": post,"level": safety_level})
+            else:
+                safety_level = int(suggestion_api.is_required_moderation(post))
+                redis_client.set(hash_key, json.dumps({"post":post,"level":safety_level}))
+                redis_client.expire(hash_key, 60 * 60 * 24 * 7)
+                response.append({"post": post,"level": safety_level})
+
+            try:
+                logger.debug(f"実行時間:{time.time() - start_time}秒")
+            except Exception as e:
+                logger.error(e)
+                raise HTTPException(status_code=500, detail="Log send failed")
+        return {"response":response}
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=500, detail="Safety judgement failed")
 
 # # TLの検閲
 # @app.post("/redaction")

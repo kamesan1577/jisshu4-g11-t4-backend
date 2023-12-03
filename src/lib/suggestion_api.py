@@ -10,7 +10,8 @@ def is_required_moderation(prompt: str) -> bool:
     Returns:
         bool: 修正が必要ならTrue、必要でなければFalse
     """
-    score = chat_api.safety_scoring(prompt)
+    clean_text = _delete_html_tag(prompt)
+    score = chat_api.safety_scoring(clean_text)
     if score.results[0].flagged:
         flag = True
     else:
@@ -27,12 +28,8 @@ def get_safety_level(prompt: str) -> int:
         int: 安全性レベル（三段階、0が一番安全）
     """
     clean_text = _delete_html_tag(prompt)
-    #TODO chat_api.pyのget_safety_level()に置き換える
-    score = chat_api.safety_scoring(clean_text)
-    if score.results[0].flagged:
-        return 1
-    else:
-        return 0
+    score = chat_api.get_safety_level(clean_text)
+    return score
 
     
 

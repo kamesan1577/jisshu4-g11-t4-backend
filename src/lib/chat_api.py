@@ -6,7 +6,6 @@ import json
 from fastapi import HTTPException
 
 logger = logging.getLogger("PocLog")
-logger.setLevel(logging.INFO)
 
 sys_prompt_single_post_path = os.path.join(
     os.path.dirname(__file__), "../prompt/modelation_single.txt"
@@ -79,6 +78,30 @@ def safety_scoring(prompt):
     )
     return response
 
-def get_safety_level(prompt) -> json:
+def get_safety_level(prompt:str) -> int:
     #TODO chat.completion経由で安全性のレベルをJSON形式でかえしてもらう
-    return 
+    system_prompt = {
+        "role": "system", "content": """
+        あなたはSNSから誹謗中傷を排除する検閲官です。
+        実際にSNSに投稿された文章を文字列として与えます。
+        あなたに搭載された倫理基準を元に与えられた文字列に対して、安全性のスコアリングを行ってください。
+
+        jsonのキーはlevelのみとしてください。
+
+        levelは0,1,2のうちいずれかを取るint型で、問題がなければ0、露骨ではないが文脈によっては不快感を与える可能性がある表現である場合は1、読み手に不快感を与える可能性が高い表現であった場合は2を選んでください。
+        """
+    }
+    user_prompt = {
+        "role": "user","content":prompt
+    }
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo-1106",
+        response_format={"type":"json_object"},
+        messages=[
+            system_prompt,
+            user_prompt
+        ]    
+    )
+    safety_level = json.loads(response.choices[0].message.content)["level"]
+    return safety_level
+
