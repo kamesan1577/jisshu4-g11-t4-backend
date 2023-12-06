@@ -31,7 +31,7 @@ app.add_middleware(
     allow_origins=[
         "https://omochifestival.com",
         "https://misskey.io",
-        "https://twitter.com/",
+        "https://twitter.com",
         "http://localhost*",
     ],
     allow_credentials=True,
