@@ -68,7 +68,7 @@ jobs:
         run: serverless plugin install --name serverless-python-requirements
       - name: Deploy Serverless Service to Dev-JP
         if: github.ref == 'refs/heads/dev-jp'
-        run: serverless deploy --verbose --config serverless.yml --stage dev-jp
+        run: serverless deploy --verbose --config serverless.yml --stage dev
       - name: Deploy Serverless Service to Dev
         if: github.ref == 'refs/heads/dev'
         run: serverless deploy --verbose --config serverless.yml --stage dev
