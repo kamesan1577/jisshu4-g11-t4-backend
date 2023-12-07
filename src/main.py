@@ -44,8 +44,13 @@ load_dotenv(verbose=True)
 
 REDIS_HOST = os.environ.get("REDIS_HOST")
 REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
-
-redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
+if REDIS_PASSWORD:
+    redis_client = redis.Redis(
+        host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, db=0, ssl=True
+    )
+else:
+    redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
 
 # lambdaにデプロイすると動かない(そもそもいらない気がするけど)
