@@ -144,7 +144,7 @@ async def judge_safety(request: models.SuggestionsRequest):
 
 # タイムラインの投稿に安全性のラベルを付与する(プロンプトを与えたgpt-3.5を使用したバージョン)
 @app.post("/moderations/suggestions/timeline-safety")
-async def judge_safety(
+async def judge_safety_timeline_completion(
     request: models.TimeLineRequest,
 ):
     try:
@@ -179,7 +179,7 @@ async def judge_safety(
 
 # タイムラインの投稿に安全性のラベルを付与する(moderation APIを使用したバージョン)
 @app.post("/moderations/suggestions/timeline-safety-with-moderation-api")
-async def judge_safety(
+async def judge_safety_timeline_moderation(
     request: models.TimeLineRequest,
 ):
     try:
