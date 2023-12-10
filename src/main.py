@@ -44,8 +44,13 @@ load_dotenv(verbose=True)
 
 REDIS_HOST = os.environ.get("REDIS_HOST")
 REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
-
-redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
+if REDIS_PASSWORD:
+    redis_client = redis.Redis(
+        host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, db=0, ssl=True
+    )
+else:
+    redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
 
 # lambdaにデプロイすると動かない(そもそもいらない気がするけど)
@@ -139,7 +144,7 @@ async def judge_safety(request: models.SuggestionsRequest):
 
 # タイムラインの投稿に安全性のラベルを付与する(プロンプトを与えたgpt-3.5を使用したバージョン)
 @app.post("/moderations/suggestions/timeline-safety")
-async def judge_safety(
+async def judge_safety_timeline_completion(
     request: models.TimeLineRequest,
 ):
     try:
@@ -174,7 +179,7 @@ async def judge_safety(
 
 # タイムラインの投稿に安全性のラベルを付与する(moderation APIを使用したバージョン)
 @app.post("/moderations/suggestions/timeline-safety-with-moderation-api")
-async def judge_safety(
+async def judge_safety_timeline_moderation(
     request: models.TimeLineRequest,
 ):
     try:

@@ -3,10 +3,12 @@ name: Deploy branch
 on:
   push:
     branches:
+      - dev-jp
       - dev
       - master
   pull_request:
     branches:
+      - dev-jp
       - dev
       - master
 
@@ -64,6 +66,9 @@ jobs:
         run: npm install -g serverless
       - name: Install Serverless Python Requirements Plugin
         run: serverless plugin install --name serverless-python-requirements
+      - name: Deploy Serverless Service to Dev-JP
+        if: github.ref == 'refs/heads/dev-jp'
+        run: serverless deploy --verbose --config serverless.yml --stage dev
       - name: Deploy Serverless Service to Dev
         if: github.ref == 'refs/heads/dev'
         run: serverless deploy --verbose --config serverless.yml --stage dev

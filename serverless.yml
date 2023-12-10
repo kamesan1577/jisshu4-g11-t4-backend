@@ -6,20 +6,7 @@ provider:
   runtime: python3.11
   architecture: x86_64
   stage: ${opt:stage, 'dev'}
-  region: us-east-1
-  vpc:
-    securityGroupIds:
-      - sg-056d81122c8bb8c7b
-    subnetIds:
-      - subnet-087c042ed1da69f52
-      - subnet-049a12748ad83ee41
-  iam:
-    role:
-      statements:
-        - Effect: "Allow"
-          Action:
-            - "ssm:GetParameter"
-          Resource: "arn:aws:ssm:${self:provider.region}:068614236466:parameter/jisshu-sheet-secret"
+  region: ap-northeast-1
 
 package:
   patterns:
