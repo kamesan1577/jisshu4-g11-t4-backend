@@ -1,8 +1,8 @@
 from . import models
 import os
-from openai import OpenAI
 import logging
 import json
+from openai import OpenAI
 from fastapi import HTTPException
 
 logger = logging.getLogger("PocLog")
@@ -69,7 +69,6 @@ def chat_modelate(prompt, user_id, model, response_language):
         error_log = {"user_id": user_id, "error": "ChatGPT API request failed"}
         logger.error(json.dumps(error_log))  # Log the error in JSON format
         raise HTTPException(status_code=500, detail="ChatGPT API request failed")
-    
 
 
 def safety_scoring(prompt):
@@ -79,7 +78,6 @@ def safety_scoring(prompt):
     return response
 
 def get_safety_level(prompt:str) -> int:
-    #TODO chat.completion経由で安全性のレベルをJSON形式でかえしてもらう
     system_prompt = {
         "role": "system", "content": """
         あなたはSNSから誹謗中傷を排除する検閲官です。
@@ -105,3 +103,5 @@ def get_safety_level(prompt:str) -> int:
     safety_level = json.loads(response.choices[0].message.content)["level"]
     return safety_level
 
+
+    
