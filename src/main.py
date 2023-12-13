@@ -5,6 +5,7 @@ import json
 import hashlib
 from .lib import chat_api, models, suggestion_api
 from .lib.redis_client import RedisClient
+
 # from .lib.db_client import db_instance
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
@@ -41,6 +42,7 @@ app.add_middleware(
 
 load_dotenv(verbose=True)
 
+
 # lambdaにデプロイすると動かない(そもそもいらない気がするけど)
 @app.get("/")
 def read_root():
@@ -75,7 +77,9 @@ async def judge_safety(request: models.SuggestionsRequest):
             logger.debug("cache hit")
         else:
             flag = suggestion_api.is_required_moderation(request.prompt)
-            RedisClient.set_value(hash_key, json.dumps({"is_required_moderation": flag}),60 * 60 * 24 * 7)
+            RedisClient.set_value(
+                hash_key, json.dumps({"is_required_moderation": flag}), 60 * 60 * 24 * 7
+            )
 
         # 実行と同時にログに流す
         log = models.SafetyJudgementLog(
@@ -103,8 +107,11 @@ async def judge_safety_timeline_completion(
     try:
         start_time = time.time()
         safety_levels = await suggestion_api.async_get_safety_level(request.prompts)
-        
-        responses = [{"post": post, "level": safety_level} for post, safety_level in zip(request.prompts, safety_levels)]
+
+        responses = [
+            {"post": post, "level": safety_level}
+            for post, safety_level in zip(request.prompts, safety_levels)
+        ]
         try:
             logger.debug(f"実行時間:{time.time() - start_time}秒")
             # print(f"実行時間:{time.time() - start_time}秒")
@@ -138,7 +145,11 @@ async def judge_safety_timeline_moderation(
                 response.append({"post": post, "level": safety_level})
             else:
                 safety_level = int(suggestion_api.is_required_moderation(post))
-                RedisClient.set_value(hash_key,json.dumps({"post": post, "level": safety_level}),expire_time=60 * 60 * 24 * 7)
+                RedisClient.set_value(
+                    hash_key,
+                    json.dumps({"post": post, "level": safety_level}),
+                    expire_time=60 * 60 * 24 * 7,
+                )
                 response.append({"post": post, "level": safety_level})
             try:
                 logger.debug(f"実行時間:{time.time() - start_time}秒")

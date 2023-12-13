@@ -39,7 +39,7 @@ def get_safety_level(prompt: str) -> int:
 
 
 # TODO キャッシングと判定処理の責任を分離したい
-async def async_get_safety_level(prompts: list[str])-> list[int]:
+async def async_get_safety_level(prompts: list[str]) -> list[int]:
     """
     文字列のリストを受け取り、それらについての安全性レベルを非同期で判定する
 
@@ -63,20 +63,28 @@ async def async_get_safety_level(prompts: list[str])-> list[int]:
         else:
             uncached_prompts.append(prompt)
             uncached_indices.append(i)
-    
+
     # キャッシュされていないプロンプトを非同期で処理する
     if uncached_prompts:
         with ThreadPoolExecutor() as executor:
-            tasks = [loop.run_in_executor(executor,chat_api.get_safety_level,prompt) for prompt in uncached_prompts]
+            tasks = [
+                loop.run_in_executor(executor, get_safety_level, prompt)
+                for prompt in uncached_prompts
+            ]
             uncached_responses = await asyncio.gather(*tasks)
 
-        for index, response in zip(uncached_indices,uncached_responses):
-            hash_key = hash_key = hashlib.sha256((uncached_prompts[index] + "safety_level").encode()).hexdigest()
-            RedisClient.set_value(hash_key,json.dumps({"post": uncached_prompts[index], "level": response}),expire_time=60 * 60 * 24 * 7)
+        for index, response in zip(uncached_indices, uncached_responses):
+            hash_key = hash_key = hashlib.sha256(
+                (uncached_prompts[index] + "safety_level").encode()
+            ).hexdigest()
+            RedisClient.set_value(
+                hash_key,
+                json.dumps({"post": uncached_prompts[index], "level": response}),
+                expire_time=60 * 60 * 24 * 7,
+            )
             responses[index] = response
 
     return responses
-
 
 
 def _delete_html_tag(text: str):
