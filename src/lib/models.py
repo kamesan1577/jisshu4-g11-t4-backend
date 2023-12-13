@@ -33,6 +33,30 @@ class HiddenChars(BaseModel):
         return v
 
 
+class Moderations(BaseModel):
+    response: str
+
+
+class IsNotSafe(BaseModel):
+    is_required_moderation: bool
+
+
+class SafetyLevel(BaseModel):
+    post: str
+    level: int
+
+
+class TimeLineSafety(BaseModel):
+    response: list[SafetyLevel]
+    index: list[int] = []
+
+    @validator("index", pre=True, always=True)
+    def set_index(cls, v, values):
+        if "response" in values:
+            return list(range(len(values["response"])))
+        return v
+
+
 # 修正のリクエスト
 class ModerationsRequest(BaseModel):
     prompt: Union[str, list[str]]

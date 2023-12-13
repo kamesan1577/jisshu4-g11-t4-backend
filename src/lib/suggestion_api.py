@@ -5,6 +5,8 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from . import chat_api
 from .redis_client import RedisClient
+from .models import SafetyLevel
+from fastapi.encoders import jsonable_encoder
 
 
 def is_required_moderation(prompt: str) -> bool:
@@ -79,7 +81,11 @@ async def async_get_safety_level(prompts: list[str]) -> list[int]:
             ).hexdigest()
             RedisClient.set_value(
                 hash_key,
-                json.dumps({"post": uncached_prompts[index], "level": response}),
+                json.dumps(
+                    jsonable_encoder(
+                        SafetyLevel(post=uncached_prompts[index], level=response)
+                    )
+                ),
                 expire_time=60 * 60 * 24 * 7,
             )
             responses[index] = response
