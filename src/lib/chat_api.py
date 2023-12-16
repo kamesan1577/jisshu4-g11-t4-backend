@@ -19,8 +19,9 @@ sys_prompt_thread = open(sys_prompt_thread_path, "r").read()
 
 client = OpenAI(
     api_key=os.environ.get("INIAD_OPENAI_API_KEY"),
-    base_url="https://api.openai.iniad.org/api/v1"
+    base_url="https://api.openai.iniad.org/api/v1",
 )
+
 
 def chat_modelate(prompt, user_id, model, response_language):
     log_data = models.ModerationsRequestLog(
@@ -77,31 +78,30 @@ def safety_scoring(prompt):
     )
     return response
 
-def get_safety_level(prompt:str) -> int:
+
+def get_safety_level(prompt: str) -> int:
     system_prompt = {
-        "role": "system", "content": """
+        "role": "system",
+        "content": """
         あなたはSNSから誹謗中傷を排除する検閲官です。
         実際にSNSに投稿された文章を文字列として与えます。
         あなたに搭載された倫理基準を元に与えられた文字列に対して、安全性のスコアリングを行ってください。
+        ただし、判定の基準として以下の要件を満たしてください。
+        ・他者を攻撃する意図のない性的なコンテンツは許容する
+        ・他者を攻撃する意図のない下品な言葉は許容する
+        ・他者を攻撃する意図のない暴力的な表現は許容する
+        ・自虐的な表現は許容する
 
         jsonのキーはlevelのみとしてください。
 
         levelは0,1,2のうちいずれかを取るint型で、問題がなければ0、露骨ではないが文脈によっては不快感を与える可能性がある表現である場合は1、読み手に不快感を与える可能性が高い表現であった場合は2を選んでください。
-        """
+        """,
     }
-    user_prompt = {
-        "role": "user","content":prompt
-    }
+    user_prompt = {"role": "user", "content": prompt}
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
-        response_format={"type":"json_object"},
-        messages=[
-            system_prompt,
-            user_prompt
-        ]    
+        response_format={"type": "json_object"},
+        messages=[system_prompt, user_prompt],
     )
     safety_level = json.loads(response.choices[0].message.content)["level"]
     return safety_level
-
-
-    

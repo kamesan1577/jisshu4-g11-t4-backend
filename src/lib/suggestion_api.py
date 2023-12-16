@@ -1,4 +1,3 @@
-import re
 import asyncio
 import hashlib
 import json
@@ -17,8 +16,7 @@ def is_required_moderation(prompt: str) -> bool:
     Returns:
         bool: 修正が必要ならTrue、必要でなければFalse
     """
-    clean_text = _delete_html_tag(prompt)
-    score = chat_api.safety_scoring(clean_text)
+    score = chat_api.safety_scoring(prompt)
     if score.results[0].flagged:
         flag = True
     else:
@@ -35,8 +33,8 @@ def get_safety_level(prompt: str) -> int:
     Returns:
         int: 安全性レベル（三段階、0が一番安全）
     """
-    clean_text = _delete_html_tag(prompt)
-    score = chat_api.get_safety_level(clean_text)
+
+    score = chat_api.get_safety_level(prompt)
     return score
 
 
@@ -91,9 +89,3 @@ async def async_get_safety_level(prompts: list[str]) -> list[int]:
             responses[index] = response
 
     return responses
-
-
-def _delete_html_tag(text: str):
-    # FIXME HTMLじゃなくても正規表現に引っかかる可能性がある
-    clean_text = re.sub(r"<[^>]+>", " ", text)
-    return clean_text

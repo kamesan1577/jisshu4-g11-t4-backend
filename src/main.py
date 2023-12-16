@@ -3,6 +3,7 @@ import time
 import logging
 import json
 import hashlib
+import re
 from .lib import chat_api, models, suggestion_api
 from .lib.redis_client import RedisClient
 from fastapi import FastAPI, HTTPException
@@ -48,6 +49,12 @@ def read_root():
     return {"Hello": "World"}
 
 
+def delete_html_tag(text: str):
+    # FIXME HTMLじゃなくても正規表現に引っかかる可能性がある
+    clean_text = re.sub(r"<[^>]+>", " ", text)
+    return clean_text
+
+
 # ツイートの修正
 @app.post("/moderations")
 async def post_completion(
@@ -65,8 +72,9 @@ async def post_completion(
 async def judge_safety(request: models.SuggestionsRequest) -> models.IsNotSafe:
     # try:
     start_time = time.time()
+    clean_prompt = delete_html_tag(request.prompt)
     hash_key = hashlib.sha256(
-        (request.prompt + "is_required_moderation").encode()
+        (clean_prompt + "is_required_moderation").encode()
     ).hexdigest()
 
     cached = RedisClient.get_value(hash_key)
@@ -75,7 +83,7 @@ async def judge_safety(request: models.SuggestionsRequest) -> models.IsNotSafe:
         flag = json.loads(cached)["is_required_moderation"]
         logger.debug("cache hit")
     else:
-        flag = suggestion_api.is_required_moderation(request.prompt)
+        flag = suggestion_api.is_required_moderation(clean_prompt)
         RedisClient.set_value(
             hash_key,
             json.dumps(jsonable_encoder(models.IsNotSafe(is_required_moderation=flag))),
@@ -86,7 +94,7 @@ async def judge_safety(request: models.SuggestionsRequest) -> models.IsNotSafe:
     log = models.SafetyJudgementLog(
         user_id=request.user_id,
         post_id="hoge",
-        prompt=request.prompt,
+        prompt=clean_prompt,
     ).model_dump()
     try:
         logger.info(json.dumps(log))
@@ -107,7 +115,8 @@ async def judge_safety_timeline_completion(
 ) -> models.TimeLineSafety:
     # try:
     start_time = time.time()
-    safety_levels = await suggestion_api.async_get_safety_level(request.prompts)
+    clean_prompt = [delete_html_tag(prompt) for prompt in request.prompts]
+    safety_levels = await suggestion_api.async_get_safety_level(clean_prompt)
 
     responses = [
         models.SafetyLevel(post=prompt, level=int(safety_level))
@@ -134,9 +143,11 @@ async def judge_safety_timeline_moderation(
     try:
         start_time = time.time()
         response = []
+
         for post in request.prompts:
+            clean_prompt = delete_html_tag(post)
             hash_key = hashlib.sha256(
-                (post + "safety_level_with_moderation_api").encode()
+                (clean_prompt + "safety_level_with_moderation_api").encode()
             ).hexdigest()
             cached = RedisClient.get_value(hash_key)
 
@@ -145,7 +156,7 @@ async def judge_safety_timeline_moderation(
                 logger.debug("cache hit")
                 response.append(models.SafetyLevel(post=post, level=safety_level))
             else:
-                safety_level = int(suggestion_api.is_required_moderation(post))
+                safety_level = int(suggestion_api.is_required_moderation(clean_prompt))
                 RedisClient.set_value(
                     hash_key,
                     json.dumps(

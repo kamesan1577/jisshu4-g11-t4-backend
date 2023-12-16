@@ -61,7 +61,7 @@ class TimeLineSafety(BaseModel):
 class ModerationsRequest(BaseModel):
     prompt: Union[str, list[str]]
     user_id: str
-    model: str = "gpt-3.5-turbo"
+    model: str = "gpt-3.5-turbo-1106"
     response_language: str = "日本語"
 
 
