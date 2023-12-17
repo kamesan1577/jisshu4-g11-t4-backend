@@ -4,11 +4,13 @@
 
 ツイート中の不適切な発言を検出し、修正する Chrome 拡張機能のバックエンドです。
 <br>
-フレームワークにはFastAPIを使用しており、[/docs](https://a3ygj5hpy8.execute-api.us-east-1.amazonaws.com/master/docs#/default/get_moral_foundation_data_moral_foundation__sheet_name__data_get) にアクセスすることでSwaggerによって自動生成されたOpenAPI Documentを参照できます
+フレームワークにはFastAPIを使用しており、[/docs](https://0htjwvzstd.execute-api.ap-northeast-1.amazonaws.com/master/docs) にアクセスすることでSwaggerによって自動生成されたOpenAPI Documentを参照できます
+<br>
+インフラはAWS Lambdaを軸に、キャッシュサーバーとしてRedisを用いています。(デプロイ環境では[upstash](https://upstash.com/)を利用)
 <br>
 浪川：読み手側が不快にならない検出用と置き換えのモジュールを用意します。
 
-# 環境構築 (筆者は Ubuntu 22.04 を使用)
+# 環境構築 (Ubuntu 22.04,Python3.10を利用)
 
 1. 仮想環境の作成
    <br>
