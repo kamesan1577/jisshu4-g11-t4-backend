@@ -1,5 +1,5 @@
 # Hate Abate
-
+フロントエンド→https://github.com/kamesan1577/jisshu4-g11-t4-frontend
 ## 概要
 
 ツイート中の不適切な発言を検出し、修正する Chrome 拡張機能のバックエンドです。
