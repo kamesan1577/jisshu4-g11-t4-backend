@@ -74,16 +74,13 @@ async def async_get_safety_level(prompts: list[str]) -> list[int]:
             uncached_responses = await asyncio.gather(*tasks)
 
         for index, response in zip(uncached_indices, uncached_responses):
+            prompt = uncached_prompts[uncached_indices.index(index)]
             hash_key = hash_key = hashlib.sha256(
-                (uncached_prompts[index] + "safety_level").encode()
+                (prompt + "safety_level").encode()
             ).hexdigest()
             RedisClient.set_value(
                 hash_key,
-                json.dumps(
-                    jsonable_encoder(
-                        SafetyLevel(post=uncached_prompts[index], level=response)
-                    )
-                ),
+                json.dumps(jsonable_encoder(SafetyLevel(post=prompt, level=response))),
                 expire_time=60 * 60 * 24 * 7,
             )
             responses[index] = response

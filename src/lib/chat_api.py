@@ -98,10 +98,12 @@ def get_safety_level(prompt: str) -> int:
         """,
     }
     user_prompt = {"role": "user", "content": prompt}
+
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
         response_format={"type": "json_object"},
         messages=[system_prompt, user_prompt],
     )
+    logger.info(f"token: {response.usage.total_tokens}")
     safety_level = json.loads(response.choices[0].message.content)["level"]
     return safety_level
