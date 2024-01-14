@@ -1,5 +1,9 @@
 from pydantic import BaseModel, validator, field_validator
-from typing import Union
+from typing import Union, Optional
+
+
+class CustomOpenAiBase(BaseModel):
+    token: str
 
 
 # TODO validatorからfield_validatorに移行する
@@ -63,12 +67,14 @@ class ModerationsRequest(BaseModel):
     user_id: str
     model: str = "gpt-3.5-turbo-1106"
     response_language: str = "日本語"
+    custom_client: Optional[CustomOpenAiBase] = None
 
 
 # 修正提案のリクエスト
 class SuggestionsRequest(BaseModel):
     prompt: str
     user_id: str
+    custom_client: Optional[CustomOpenAiBase] = None
 
 
 # 提案受け入れ記録のリクエスト
@@ -81,6 +87,7 @@ class IsAcceptedSuggestionRequest(HiddenChars):
 class TimeLineRequest(BaseModel):
     prompts: list[str]
     index: list[int] = []
+    custom_client: Optional[CustomOpenAiBase] = None
 
     @validator("index", pre=True, always=True)
     def set_index(cls, v, values):

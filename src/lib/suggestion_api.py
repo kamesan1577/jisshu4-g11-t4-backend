@@ -8,7 +8,7 @@ from .models import SafetyLevel
 from fastapi.encoders import jsonable_encoder
 
 
-def is_required_moderation(prompt: str) -> bool:
+def is_required_moderation(prompt: str, custom_client=None) -> bool:
     """文字列を受け取り、修正が必要かどうかを判定する
 
     Args:
@@ -16,7 +16,7 @@ def is_required_moderation(prompt: str) -> bool:
     Returns:
         bool: 修正が必要ならTrue、必要でなければFalse
     """
-    score = chat_api.safety_scoring(prompt)
+    score = chat_api.safety_scoring(prompt, custom_client)
     if score.results[0].flagged:
         flag = True
     else:
@@ -24,7 +24,7 @@ def is_required_moderation(prompt: str) -> bool:
     return flag
 
 
-def get_safety_level(prompt: str) -> int:
+def get_safety_level(prompt: str, custom_client=None) -> int:
     """
     文字列を受け取り、その安全性レベルを判定する
 
