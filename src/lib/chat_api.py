@@ -23,7 +23,24 @@ client = OpenAI(
 )
 
 
-def chat_modelate(prompt, user_id, model, response_language):
+def chat_modelate(
+    prompt,
+    user_id,
+    model,
+    response_language,
+    custom_client: models.CustomOpenAiBase | None = None,
+):
+    temp_client = client
+    if custom_client:
+        try:
+            temp_client = OpenAI(api_key=custom_client.token)
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"""Client authorization failed
+                  detail: {e}""",
+            )
+
     log_data = models.ModerationsRequestLog(
         prompt=prompt,
         user_id=user_id,
@@ -52,7 +69,7 @@ def chat_modelate(prompt, user_id, model, response_language):
         """,
         }
         user_prompt = [{"role": "user", "content": p} for p in prompt]
-    response = client.chat.completions.create(
+    response = temp_client.chat.completions.create(
         model=model, messages=[system_prompt, *user_prompt]
     )
 
@@ -72,14 +89,26 @@ def chat_modelate(prompt, user_id, model, response_language):
         raise HTTPException(status_code=500, detail="ChatGPT API request failed")
 
 
-def safety_scoring(prompt):
-    response = client.moderations.create(
+def safety_scoring(prompt, custom_client: models.CustomOpenAiBase | None = None):
+    temp_client = client
+    if custom_client:
+        try:
+            temp_client = OpenAI(api_key=custom_client.token)
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"""Client authorization failed
+                  detail: {e}""",
+            )
+    response = temp_client.moderations.create(
         input=prompt,
     )
     return response
 
 
-def get_safety_level(prompt: str) -> int:
+def get_safety_level(
+    prompt: str, custom_client: models.CustomOpenAiBase | None = None
+) -> int:
     system_prompt = {
         "role": "system",
         "content": """
@@ -99,7 +128,18 @@ def get_safety_level(prompt: str) -> int:
     }
     user_prompt = {"role": "user", "content": prompt}
 
-    response = client.chat.completions.create(
+    temp_client = client
+    if custom_client:
+        try:
+            temp_client = OpenAI(api_key=custom_client.token)
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"""Client authorization failed
+                  detail: {e}""",
+            )
+
+    response = temp_client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
         response_format={"type": "json_object"},
         messages=[system_prompt, user_prompt],
