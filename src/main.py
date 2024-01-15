@@ -62,7 +62,11 @@ async def post_completion(
 ) -> models.Moderations:
     # プロンプトをリストで渡した場合はスレッドとして扱う
     response = chat_api.chat_modelate(
-        request.prompt, request.user_id, request.model, request.response_language
+        request.prompt,
+        request.user_id,
+        request.model,
+        request.response_language,
+        request.custom_client,
     )
     return models.Moderations(response=response)
 
@@ -83,7 +87,9 @@ async def judge_safety(request: models.SuggestionsRequest) -> models.IsNotSafe:
         flag = json.loads(cached)["is_required_moderation"]
         logger.debug("cache hit")
     else:
-        flag = suggestion_api.is_required_moderation(clean_prompt)
+        flag = suggestion_api.is_required_moderation(
+            clean_prompt, request.custom_client
+        )
         RedisClient.set_value(
             hash_key,
             json.dumps(jsonable_encoder(models.IsNotSafe(is_required_moderation=flag))),
@@ -116,7 +122,9 @@ async def judge_safety_timeline_completion(
     # try:
     start_time = time.time()
     clean_prompt = [delete_html_tag(prompt) for prompt in request.prompts]
-    safety_levels = await suggestion_api.async_get_safety_level(clean_prompt)
+    safety_levels = await suggestion_api.async_get_safety_level(
+        clean_prompt, request.custom_client
+    )
 
     responses = [
         models.SafetyLevel(post=prompt, level=int(safety_level))

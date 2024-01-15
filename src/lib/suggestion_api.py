@@ -8,7 +8,7 @@ from .models import SafetyLevel
 from fastapi.encoders import jsonable_encoder
 
 
-def is_required_moderation(prompt: str) -> bool:
+def is_required_moderation(prompt: str, custom_client=None) -> bool:
     """文字列を受け取り、修正が必要かどうかを判定する
 
     Args:
@@ -16,7 +16,7 @@ def is_required_moderation(prompt: str) -> bool:
     Returns:
         bool: 修正が必要ならTrue、必要でなければFalse
     """
-    score = chat_api.safety_scoring(prompt)
+    score = chat_api.safety_scoring(prompt, custom_client)
     if score.results[0].flagged:
         flag = True
     else:
@@ -24,7 +24,7 @@ def is_required_moderation(prompt: str) -> bool:
     return flag
 
 
-def get_safety_level(prompt: str) -> int:
+def get_safety_level(prompt: str, custom_client=None) -> int:
     """
     文字列を受け取り、その安全性レベルを判定する
 
@@ -34,12 +34,12 @@ def get_safety_level(prompt: str) -> int:
         int: 安全性レベル（三段階、0が一番安全）
     """
 
-    score = chat_api.get_safety_level(prompt)
+    score = chat_api.get_safety_level(prompt, custom_client)
     return score
 
 
 # TODO キャッシングと判定処理の責任を分離したい
-async def async_get_safety_level(prompts: list[str]) -> list[int]:
+async def async_get_safety_level(prompts: list[str], custom_client=None) -> list[int]:
     """
     文字列のリストを受け取り、それらについての安全性レベルを非同期で判定する
 
@@ -68,7 +68,7 @@ async def async_get_safety_level(prompts: list[str]) -> list[int]:
     if uncached_prompts:
         with ThreadPoolExecutor() as executor:
             tasks = [
-                loop.run_in_executor(executor, get_safety_level, prompt)
+                loop.run_in_executor(executor, get_safety_level, prompt, custom_client)
                 for prompt in uncached_prompts
             ]
             uncached_responses = await asyncio.gather(*tasks)

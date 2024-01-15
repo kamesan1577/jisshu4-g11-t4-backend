@@ -20,6 +20,7 @@ moral_foundation_dic = db_instance.fetch_sheet_value(WORKSHEET_NAME)
 CLIENT_ID = os.environ.get("YAHOO_CLIENT_ID")
 BASE_URL = "https://jlp.yahooapis.jp/MAService/V2/parse"
 
+
 # 使わない
 def ketaiso(text: str, is_directry: bool = True) -> list:
     if is_directry:

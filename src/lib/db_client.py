@@ -10,6 +10,7 @@ from httpx import request
 
 logging.basicConfig(level=logging.INFO)
 
+
 # 使わない
 class DBClient:
     # FIXME 立ち上がりに数秒かかる
@@ -96,7 +97,7 @@ class DBClient:
                 raise
 
         return filename
-    
+
     def _get_ruby(self, word: str) -> str:
         url = "https://yomi-tan.jp/api/yomi.php"
         query = "?ic=UTF-8&oc=UTF-8&k=h&n=1&t="
@@ -106,6 +107,7 @@ class DBClient:
         except Exception as e:
             logging.error(f"Error fetching ruby: {e}")
             raise
+
 
 # import時にインスタンスを作成する
 load_dotenv(verbose=True)
