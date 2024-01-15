@@ -17,10 +17,28 @@ sys_prompt_thread_path = os.path.join(
 sys_prompt_single_post = open(sys_prompt_single_post_path, "r").read()
 sys_prompt_thread = open(sys_prompt_thread_path, "r").read()
 
-client = OpenAI(
-    api_key=os.environ.get("INIAD_OPENAI_API_KEY"),
-    base_url="https://api.openai.iniad.org/api/v1",
-)
+# client = OpenAI(
+#     api_key=os.environ.get("INIAD_OPENAI_API_KEY"),
+#     base_url="https://api.openai.iniad.org/api/v1",
+# )
+
+
+def create_chat_client(custom_client: models.CustomOpenAiBase | None = None):
+    if custom_client:
+        try:
+            res = OpenAI(api_key=custom_client.token)
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"""Client authorization failed
+                  detail: {e}""",
+            )
+    else:
+        res = OpenAI(
+            api_key=os.environ.get("INIAD_OPENAI_API_KEY"),
+            base_url="https://api.openai.iniad.org/api/v1",
+        )
+    return res
 
 
 def chat_modelate(
@@ -30,17 +48,7 @@ def chat_modelate(
     response_language,
     custom_client: models.CustomOpenAiBase | None = None,
 ):
-    temp_client = client
-    if custom_client:
-        try:
-            temp_client = OpenAI(api_key=custom_client.token)
-        except Exception as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"""Client authorization failed
-                  detail: {e}""",
-            )
-
+    client = create_chat_client(custom_client)
     log_data = models.ModerationsRequestLog(
         prompt=prompt,
         user_id=user_id,
@@ -49,7 +57,6 @@ def chat_modelate(
         post_id="hoge",
     ).model_dump()
     logger.info(json.dumps(log_data))  # Logs the data in JSON format
-
     # リストで渡された場合はスレッドとして扱う
     if type(prompt) is not list:
         system_prompt = {
@@ -69,8 +76,9 @@ def chat_modelate(
         """,
         }
         user_prompt = [{"role": "user", "content": p} for p in prompt]
-    response = temp_client.chat.completions.create(
-        model=model, messages=[system_prompt, *user_prompt]
+    response = client.chat.completions.create(
+        model=model,
+        messages=[system_prompt, *user_prompt],
     )
 
     if response.choices:
@@ -90,17 +98,8 @@ def chat_modelate(
 
 
 def safety_scoring(prompt, custom_client: models.CustomOpenAiBase | None = None):
-    temp_client = client
-    if custom_client:
-        try:
-            temp_client = OpenAI(api_key=custom_client.token)
-        except Exception as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"""Client authorization failed
-                  detail: {e}""",
-            )
-    response = temp_client.moderations.create(
+    client = create_chat_client(custom_client)
+    response = client.moderations.create(
         input=prompt,
     )
     return response
@@ -128,18 +127,9 @@ def get_safety_level(
     }
     user_prompt = {"role": "user", "content": prompt}
 
-    temp_client = client
-    if custom_client:
-        try:
-            temp_client = OpenAI(api_key=custom_client.token)
-        except Exception as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"""Client authorization failed
-                  detail: {e}""",
-            )
+    client = create_chat_client(custom_client)
 
-    response = temp_client.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
         response_format={"type": "json_object"},
         messages=[system_prompt, user_prompt],

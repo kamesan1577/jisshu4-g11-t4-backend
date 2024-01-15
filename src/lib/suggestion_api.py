@@ -34,12 +34,12 @@ def get_safety_level(prompt: str, custom_client=None) -> int:
         int: 安全性レベル（三段階、0が一番安全）
     """
 
-    score = chat_api.get_safety_level(prompt)
+    score = chat_api.get_safety_level(prompt, custom_client)
     return score
 
 
 # TODO キャッシングと判定処理の責任を分離したい
-async def async_get_safety_level(prompts: list[str]) -> list[int]:
+async def async_get_safety_level(prompts: list[str], custom_client=None) -> list[int]:
     """
     文字列のリストを受け取り、それらについての安全性レベルを非同期で判定する
 
@@ -68,7 +68,7 @@ async def async_get_safety_level(prompts: list[str]) -> list[int]:
     if uncached_prompts:
         with ThreadPoolExecutor() as executor:
             tasks = [
-                loop.run_in_executor(executor, get_safety_level, prompt)
+                loop.run_in_executor(executor, get_safety_level, prompt, custom_client)
                 for prompt in uncached_prompts
             ]
             uncached_responses = await asyncio.gather(*tasks)

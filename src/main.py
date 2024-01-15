@@ -122,7 +122,9 @@ async def judge_safety_timeline_completion(
     # try:
     start_time = time.time()
     clean_prompt = [delete_html_tag(prompt) for prompt in request.prompts]
-    safety_levels = await suggestion_api.async_get_safety_level(clean_prompt)
+    safety_levels = await suggestion_api.async_get_safety_level(
+        clean_prompt, request.custom_client
+    )
 
     responses = [
         models.SafetyLevel(post=prompt, level=int(safety_level))
